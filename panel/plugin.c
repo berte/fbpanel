@@ -179,7 +179,7 @@ plugin_start(plugin_instance *this)
         /* create a no-window widget and do not show it it's usefull to have
          * unmaped widget for invisible plugins so their indexes in plugin list
          * are the same as in panel->box. required for children reordering */
-        this->pwid = gtk_vbox_new(TRUE, 0);
+        this->pwid = gtk_box_new(TRUE, 0);
         gtk_box_pack_start(GTK_BOX(this->panel->box), this->pwid, FALSE,
                 TRUE,0);
         gtk_widget_hide(this->pwid);
@@ -213,7 +213,7 @@ default_plugin_edit_config(plugin_instance *pl)
     gchar *msg;
 
     ENTER;
-    vbox = gtk_vbox_new(FALSE, 0);
+    vbox = gtk_box_new(FALSE, 0);
     /* XXX: harcoded default profile name */
     msg = g_strdup_printf("Graphical '%s' plugin configuration\n is not "
           "implemented yet.\n"

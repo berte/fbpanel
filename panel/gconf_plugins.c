@@ -80,12 +80,12 @@ mk_buttons()
 {
     GtkWidget *bm, *b, *w;
 
-    bm = gtk_hbox_new(FALSE, 3);
+    bm = gtk_box_new(FALSE, 3);
 
     w = gtk_button_new_from_stock(GTK_STOCK_ADD);
     gtk_box_pack_start(GTK_BOX(bm), w, FALSE, TRUE, 0);
 
-    b = gtk_hbox_new(FALSE, 3);
+    b = gtk_box_new(FALSE, 3);
     gtk_box_pack_start(GTK_BOX(bm), b, FALSE, TRUE, 0);
     bbox = b;
     gtk_widget_set_sensitive(bbox, FALSE);
@@ -108,7 +108,7 @@ mk_tab_plugins(xconf *xc)
     GtkWidget *page, *w;
 
     ENTER;
-    page = gtk_vbox_new(FALSE, 1);
+    page = gtk_box_new(FALSE, 1);
     gtk_container_set_border_width(GTK_CONTAINER(page), 10);
 
     mk_model(xc);

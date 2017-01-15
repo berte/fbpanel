@@ -27,9 +27,10 @@
 #include <string.h>
 #include "gtkbgbox.h"
 #include "bg.h"
+#include <gtk/gtkbin.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
-#include <gdk/gdkpixmap.h>
+//#include <gdk/gdkpixmap.h>
 #include <gdk/gdkprivate.h>
 #include <glib.h>
 #include <glib-object.h>
@@ -39,7 +40,8 @@
 #include "dbg.h"
 
 typedef struct {
-    GdkPixmap *pixmap;
+    //GdkPixmap *pixmap;
+    cairo_surface_t *pixmap;
     guint32 tintcolor;
     gint alpha;
     int bg_type;

@@ -693,8 +693,8 @@ panel_parse_global(xconf *xc)
     XCG(xc, "maxelemheight", &p->max_elem_height, int);
 
     /* Sanity checks */
-    if (!gdk_color_parse(p->tintcolor_name, &p->gtintcolor))
-        gdk_color_parse("white", &p->gtintcolor);
+    if (!gdk_rgba_parse(p->tintcolor_name, &p->gtintcolor))
+        gdk_rgba_parse("white", &p->gtintcolor);
     p->tintcolor = gcolor2rgb24(&p->gtintcolor);
     DBG("tintcolor=%x\n", p->tintcolor);
     if (p->alpha > 255)
@@ -702,10 +702,10 @@ panel_parse_global(xconf *xc)
     p->orientation = (p->edge == EDGE_TOP || p->edge == EDGE_BOTTOM)
         ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL;
     if (p->orientation == GTK_ORIENTATION_HORIZONTAL) {
-        p->my_box_new = gtk_hbox_new;
+        p->my_box_new = gtk_box_new;
         p->my_separator_new = gtk_vseparator_new;
     } else {
-        p->my_box_new = gtk_vbox_new;
+        p->my_box_new = gtk_box_new;
         p->my_separator_new = gtk_hseparator_new;
     }
     if (p->width < 0)

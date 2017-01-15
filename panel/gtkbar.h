@@ -29,7 +29,7 @@
 
 
 #include <gdk/gdk.h>
-#include <gtk/gtkbox.h>
+//#include <gtk/gtkbox.h>
 
 
 #ifdef __cplusplus

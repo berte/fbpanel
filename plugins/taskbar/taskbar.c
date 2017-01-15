@@ -944,7 +944,7 @@ tk_build_gui(taskbar_priv *tb, task *tk)
     gtk_misc_set_padding(GTK_MISC(tk->image), 0, 0);
 
     if (!tb->icons_only) {
-        w1 = gtk_hbox_new(FALSE, 1);
+        w1 = gtk_box_new(FALSE, 1);
         gtk_container_set_border_width(GTK_CONTAINER(w1), 0);
         gtk_box_pack_start(GTK_BOX(w1), tk->image, FALSE, FALSE, 0);
         tk->label = gtk_label_new(tk->iconified ? tk->iname : tk->name);

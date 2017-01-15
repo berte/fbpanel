@@ -309,7 +309,7 @@ dclock_constructor(plugin_instance *p)
     if (color_str)
     {
         GdkColor color;
-        if (gdk_color_parse (color_str, &color)) 
+        if (gdk_rgba_parse (color_str, &color)) 
             dc->color = gcolor2rgb24(&color);
     }
     if (dc->hours_view == DC_24H)

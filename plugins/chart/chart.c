@@ -191,7 +191,7 @@ chart_alloc_gcs(chart_priv *c, gchar *colors[])
     if (c->gc_cpu) {
         for (i = 0; i < c->rows; i++) {
             c->gc_cpu[i] = gdk_gc_new(c->plugin.panel->topgwin->window);
-            gdk_color_parse(colors[i], &color);
+            gdk_rgba_parse(colors[i], &color);
             gdk_colormap_alloc_color(
                 gdk_drawable_get_colormap(c->plugin.panel->topgwin->window),
                 &color, FALSE, TRUE);

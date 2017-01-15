@@ -121,7 +121,8 @@ fb_bg_init (FbBg *bg)
     uint mask;
 
     ENTER;
-    bg->dpy = GDK_DISPLAY();
+    //bg->dpy = GDK_DISPLAY();
+    bg->dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
     bg->xroot = DefaultRootWindow(bg->dpy);
     bg->id = XInternAtom(bg->dpy, "_XROOTPMAP_ID", False);
     bg->pixmap = fb_bg_get_xrootpmap_real(bg);
@@ -200,42 +201,56 @@ fb_bg_get_xrootpmap_real(FbBg *bg)
 
 
 
-GdkPixmap *
+//GdkPixmap *
+cairo_surface_t *
 fb_bg_get_xroot_pix_for_area(FbBg *bg, gint x, gint y,
     gint width, gint height, gint depth)
 {
-    GdkPixmap *gbgpix;
+    //GdkPixmap *gbgpix;
+    cairo_surface_t *gbgpix;
     Pixmap bgpix;
 
     ENTER;
     if (bg->pixmap == None)
         RET(NULL);
-    gbgpix = gdk_pixmap_new(NULL, width, height, depth);
+    
+    //gdk_pixmap_new(NULL, width, height, depth);
+    gbgpix = cairo_image_surface_create (CAIRO_FORMAT_A1, width, height);
+    
     if (!gbgpix) {
         ERR("gdk_pixmap_new failed\n");
         RET(NULL);
     }
-    bgpix =  gdk_x11_drawable_get_xid(gbgpix);
+    //bgpix =  gdk_x11_drawable_get_xid(gbgpix);
+    //bgpix =  gdk_x11_window_get_xid(gbgpix);
+    GtkWidget* widget = gtk_offscreen_window_new();
+    bgpix = gdk_x11_window_get_xid(gtk_widget_get_window(widget));
+
     XSetTSOrigin(bg->dpy, bg->gc, -x, -y) ;
     XFillRectangle(bg->dpy, bgpix, bg->gc, 0, 0, width, height);
     RET(gbgpix);
 }
 
-GdkPixmap *
+//GdkPixmap *
+cairo_surface_t *
 fb_bg_get_xroot_pix_for_win(FbBg *bg, GtkWidget *widget)
 {
     Window win;
     Window dummy;
     Pixmap bgpix;
-    GdkPixmap *gbgpix;
+    //GdkPixmap *gbgpix;
+    cairo_surface_t  *gbgpix;
     guint  width, height, border, depth;
     int  x, y;
+//    GtkWidget* widget = NULL;
 
     ENTER;
     if (bg->pixmap == None)
         RET(NULL);
 
-    win = GDK_WINDOW_XWINDOW(widget->window);
+    //win = GDK_WINDOW_XWINDOW(widget->window);
+    widget = gtk_offscreen_window_new();
+    win = GDK_WINDOW_XID( gtk_widget_get_window(widget) );
     if (!XGetGeometry(bg->dpy, win, &dummy, &x, &y, &width, &height, &border,
               &depth)) {
         DBG2("XGetGeometry failed\n");
@@ -246,31 +261,46 @@ fb_bg_get_xroot_pix_for_win(FbBg *bg, GtkWidget *widget)
 
     XTranslateCoordinates(bg->dpy, win, bg->xroot, 0, 0, &x, &y, &dummy);
     DBG("win=%lx %dx%d%+d%+d\n", win, width, height, x, y);
-    gbgpix = gdk_pixmap_new(NULL, width, height, depth);
+    //gbgpix = gdk_pixmap_new(NULL, width, height, depth);
+    gbgpix = cairo_image_surface_create (CAIRO_FORMAT_A1, width, height);
     if (!gbgpix) {
         ERR("gdk_pixmap_new failed\n");
         RET(NULL);
     }
-    bgpix =  gdk_x11_drawable_get_xid(gbgpix);
+    //bgpix =  gdk_x11_drawable_get_xid(gbgpix);
+    //bgpix =  gdk_x11_window_get_xid(gbgpix);
+    //GtkWidget* widget = gtk_offscreen_window_new();
+    bgpix = gdk_x11_window_get_xid(gtk_widget_get_window(widget));
+
     XSetTSOrigin(bg->dpy, bg->gc, -x, -y) ;
     XFillRectangle(bg->dpy, bgpix, bg->gc, 0, 0, width, height);
     RET(gbgpix);
 }
 
 void
-fb_bg_composite(GdkDrawable *base, GdkGC *gc, guint32 tintcolor, gint alpha)
+//fb_bg_composite(GdkDrawable *base, GdkGC *gc, guint32 tintcolor, gint alpha)
+fb_bg_composite(cairo_surface_t *base, cairo_t *gc, guint32 tintcolor, gint alpha)
 {
     GdkPixbuf *ret, *ret2;
     int w, h;
-    static GdkColormap *cmap = NULL;
+    static GdkVisual *cmap = NULL;
+    GtkWidget* widget = NULL;
+    GdkWindow *root;
 
     ENTER;
-    gdk_drawable_get_size (base, &w, &h);
+    //gdk_drawable_get_size (base, &w, &h);
+    widget = gtk_offscreen_window_new();
+    w = gdk_window_get_width (gtk_widget_get_window (widget));
+    h = gdk_window_get_height(gtk_widget_get_window (widget));
     if (!cmap) {
-        cmap = gdk_colormap_get_system ();
+        //cmap = gdk_colormap_get_system ();
+        cmap = gdk_screen_get_system_visual(NULL);
     }
     DBG("here\n");
-    ret = gdk_pixbuf_get_from_drawable (NULL, base, cmap, 0, 0, 0, 0, w, h);
+    ///ret = gdk_pixbuf_get_from_drawable (NULL, base, cmap, 0, 0, 0, 0, w, h);
+    // GtkWindow *win = gdk_x11_window_get_xid(gtk_widget_get_window(widget));
+    root = gdk_get_default_root_window();
+    ret = gdk_pixbuf_get_from_window (root, 0, 0, w, h);
     if (!ret)
         RET();
     DBG("here w=%d h=%d\n", w, h);
@@ -282,8 +312,14 @@ fb_bg_composite(GdkDrawable *base, GdkGC *gc, guint32 tintcolor, gint alpha)
         RET();
     }
     //gdk_pixbuf_render_to_drawable (ret2, base, gc, 0, 0, 0, 0, w, h, GDK_RGB_DITHER_NONE, 0, 0);
-    gdk_draw_pixbuf (base, gc, ret2, 0, 0, 0, 0, w, h,
-        GDK_RGB_DITHER_NONE, 0, 0);
+    //gdk_draw_pixbuf (base, gc, ret2, 0, 0, 0, 0, w, h, GDK_RGB_DITHER_NONE, 0, 0);
+    
+    //cairo_t *cr = gdk_cairo_create (base);
+    gdk_cairo_set_source_pixbuf (gc, ret2, 0, 0);
+    cairo_rectangle (gc, 0, 0, w, h);
+    cairo_paint (gc);
+    cairo_destroy (gc);
+
     g_object_unref(ret);
     g_object_unref(ret2);
     RET();
