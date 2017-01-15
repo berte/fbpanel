@@ -287,7 +287,8 @@ def opt_new_from_pkg(vname, pname, pvars = [], pversion = "", required = True):
     opt_new(vname + '_cflags',
         default = my_check_output(cmd + ['--cflags']))
     opt_new(vname + '_version',
-        default = my_check_output(cmd + ['--modversion']))
+        default = my_check_output(cmd + ['--modversion'])) 
+    print("cmd ->>" + vname)
     for v in pvars:
         opt_new(vname + '_' + v,
                 default = my_check_output(cmd + ['--variable=' + v]))

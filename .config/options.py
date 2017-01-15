@@ -69,7 +69,7 @@ def resolve():
         # if alsa is not installed, will raise exception
         opt_new_from_pkg('alsa', 'alsa', pversion = '--atleast-version=1.0.10')
 
-    opt_new_from_pkg('gtk2', 'gtk+-2.0', pversion = '--atleast-version=2.17')
+    opt_new_from_pkg('gtk3', 'gtk+-3.0', pversion = '--atleast-version=3.20')
     opt_new_from_pkg('gmodule2', 'gmodule-2.0')
     opt_new_from_pkg('x11', 'x11')
     opt_new('cflags_extra', default='-I$(TOPDIR)/panel')

@@ -3,8 +3,8 @@
 TOPDIR := ../..
 
 meter_src = meter.c
-meter_cflags = -DPLUGIN $(GTK2_CFLAGS) 
-meter_libs = $(GTK2_LIBS) 
+meter_cflags = -DPLUGIN $(GTK3_CFLAGS) 
+meter_libs = $(GTK3_LIBS) 
 meter_type = lib 
 
 include $(TOPDIR)/.config/rules.mk

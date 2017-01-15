@@ -3,8 +3,8 @@
 TOPDIR := ../..
 
 user_src = user.c
-user_cflags = -DPLUGIN $(GTK2_CFLAGS)
-user_libs = $(GTK2_LIBS)
+user_cflags = -DPLUGIN $(GTK3_CFLAGS)
+user_libs = $(GTK3_LIBS)
 user_type = lib
 
 include $(TOPDIR)/.config/rules.mk

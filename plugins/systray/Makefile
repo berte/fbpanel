@@ -6,8 +6,8 @@ tray_src = egg-marshal.c \
     eggtraymanager.c \
     fixedtip.c \
     main.c
-tray_cflags = -DPLUGIN $(GTK2_CFLAGS) 
-tray_libs = $(GTK2_LIBS) 
+tray_cflags = -DPLUGIN $(GTK3_CFLAGS) 
+tray_libs = $(GTK3_LIBS) 
 tray_type = lib 
 
 include $(TOPDIR)/.config/rules.mk
