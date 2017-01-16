@@ -45,7 +45,7 @@ panel_set_wm_strut(panel *p)
     int i = 4;
 
     ENTER;
-    if (!GTK_WIDGET_MAPPED(p->topgwin))
+    if (!gtk_widget_get_mapped(p->topgwin))
         return;
     /* most wm's tend to ignore struts of unmapped windows, and that's how
      * fbpanel hides itself. so no reason to set it. */
@@ -237,9 +237,9 @@ make_round_corners(panel *p)
     cairo_set_source_surface(gc, NULL, 0, 0); 	
     cairo_paint(gc);
     
-    gdk_gc_set_foreground(gc, &black);
+    //gdk_gc_set_foreground(gc, &black);
     //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, 0, 0, w, h);
-    gdk_gc_set_foreground(gc, &white);
+    //gdk_gc_set_foreground(gc, &white);
     //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, r, 0, w-2*r, h);
     //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, 0, r, r, h-2*r);
     //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, w-r, r, r, h-2*r);
@@ -475,11 +475,12 @@ void
 about()
 {
     gchar *authors[] = { "Anatoly Asviyan <aanatoly@users.sf.net>", NULL };
+    gchar *developers[] = { "Behzat Erte <behzaterte@yandex.com>", NULL };
 
     ENTER;
     gtk_show_about_dialog(NULL,
         "authors", authors,
-        "comments", "Lightweight GTK+ desktop panel",
+        "comments", "Lightweight GTK+3 desktop panel",
         "license", "GPLv2",
         "program-name", PROJECT_NAME,
         "version", PROJECT_VERSION,
@@ -596,7 +597,7 @@ panel_start_gui(panel *p)
     gtk_window_stick(GTK_WINDOW(p->topgwin));
 
     gtk_widget_realize(p->topgwin);
-    p->topxwin = GDK_WINDOW_XWINDOW(gtk_widget_get_window(p->topgwin));
+    p->topxwin = GDK_WINDOW_XID(gtk_widget_get_window(p->topgwin));
     DBG("topxwin = %lx\n", p->topxwin);
     /* ensure configure event */
     XMoveWindow(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), p->topxwin, 20, 20);
@@ -953,14 +954,15 @@ main(int argc, char *argv[])
     bindtextdomain(PROJECT_NAME, LOCALEDIR);
     textdomain(PROJECT_NAME);
 
-    gtk_set_locale();
+//    gtk_set_locale();
+    setlocale (LC_ALL, "");
     gtk_init(&argc, &argv);
     XSetLocaleModifiers("");
     XSetErrorHandler((XErrorHandler) handle_error);
     fb_init();
     do_argv(argc, argv);
     profile_file = g_build_filename(g_get_user_config_dir(),
-        "fbpanel", profile, NULL);
+        "fbpanel3", profile, NULL);
     ensure_profile();
     gtk_icon_theme_append_search_path(gtk_icon_theme_get_default(), IMGPREFIX);
     signal(SIGUSR1, sig_usr1);

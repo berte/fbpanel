@@ -249,7 +249,7 @@ gtk_bgbox_style_set (GtkWidget *widget, GtkStyle  *previous_style)
 
     ENTER;
     priv = GTK_BGBOX_GET_PRIVATE (widget);
-    if (GTK_WIDGET_REALIZED (widget) && !GTK_WIDGET_NO_WINDOW (widget)) {
+    if (gtk_widget_get_realized(widget) && !gtk_widget_get_has_window (widget)) {
         gtk_bgbox_set_background(widget, priv->bg_type, priv->tintcolor, priv->alpha);
     }
     RET();
@@ -273,7 +273,7 @@ gtk_bgbox_size_request (GtkWidget *widget, GtkRequisition *requisition)
     requisition->width = gtk_container_get_border_width(GTK_CONTAINER(widget)) * 2;
     requisition->height = gtk_container_get_border_width(GTK_CONTAINER(widget)) * 2;
 
-    if (gtk_bin_get_child(bin) && GTK_WIDGET_VISIBLE (gtk_bin_get_child(bin)))
+    if (gtk_bin_get_child(bin) && gtk_widget_get_visible (gtk_bin_get_child(bin)))
     {
         GtkRequisition child_requisition;
 
@@ -314,7 +314,7 @@ gtk_bgbox_size_allocate (GtkWidget *widget, GtkAllocation *wa)
     ca.width  = MAX (wa->width  - border * 2, 0);
     ca.height = MAX (wa->height - border * 2, 0);
 
-    if (GTK_WIDGET_REALIZED (widget) && !GTK_WIDGET_NO_WINDOW (widget) && !same_alloc) {
+    if (gtk_widget_get_realized(widget) && !gtk_widget_get_has_window (widget) && !same_alloc) {
         priv = GTK_BGBOX_GET_PRIVATE (widget);
         DBG("move resize pos=%d,%d geom=%dx%d\n", wa->x, wa->y, wa->width, wa->height);
         gdk_window_move_resize (gtk_widget_get_window(widget), wa->x, wa->y, wa->width, wa->height);
@@ -334,7 +334,7 @@ gtk_bgbox_bg_changed(FbBg *bg, GtkWidget *widget)
 
     ENTER;
     priv = GTK_BGBOX_GET_PRIVATE (widget);
-    if (GTK_WIDGET_REALIZED (widget) && !GTK_WIDGET_NO_WINDOW (widget)) {
+    if (gtk_widget_get_realized(widget) && !gtk_widget_get_has_window (widget)) {
         gtk_bgbox_set_background(widget, priv->bg_type, priv->tintcolor, priv->alpha);
     }
     RET();
@@ -410,7 +410,8 @@ gtk_bgbox_set_bg_root(GtkWidget *widget, GtkBgboxPrivate *priv)
     if (priv->alpha)
         fb_bg_composite(priv->pixmap, gtk_widget_get_style(widget), priv->tintcolor, priv->alpha);
 
-    gdk_window_set_back_pixmap(gtk_widget_get_window(widget), priv->pixmap, FALSE);
+    //gdk_window_set_back_pixmap(gtk_widget_get_window(widget), priv->pixmap, FALSE);
+    gdk_window_set_background_pattern(gtk_widget_get_window(widget), priv->pixmap);
     RET();
 }
 
@@ -420,6 +421,7 @@ gtk_bgbox_set_bg_inherit(GtkWidget *widget, GtkBgboxPrivate *priv)
     priv = GTK_BGBOX_GET_PRIVATE (widget);
 
     ENTER;
-    gdk_window_set_back_pixmap(gtk_widget_get_window(widget), NULL, TRUE);
+    //gdk_window_set_back_pixmap(gtk_widget_get_window(widget), NULL, TRUE);
+    gdk_window_set_background_pattern(gtk_widget_get_window(widget), NULL);
     RET();
 }

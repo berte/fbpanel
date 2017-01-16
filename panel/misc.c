@@ -339,7 +339,8 @@ text_property_to_utf8 (const XTextProperty *prop)
 
   ENTER;
   list = NULL;
-  count = gdk_text_property_to_utf8_list (gdk_x11_xatom_to_atom (prop->encoding),
+  count = gdk_text_property_to_utf8_list_for_display (gdk_display_get_default(),
+  					  gdk_x11_xatom_to_atom (prop->encoding),
                                           prop->format,
                                           prop->value,
                                           prop->nitems,

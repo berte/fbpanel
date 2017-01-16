@@ -2,7 +2,7 @@
 
 TOPDIR := ..
 
-SUBDIRS := battery \
+#SUBDIRS := battery \
     chart \
     cpu \
     dclock \

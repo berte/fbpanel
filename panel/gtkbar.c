@@ -126,7 +126,7 @@ gtk_bar_size_request(GtkWidget *widget, GtkRequisition *requisition)
         child = children->data;
         children = children->next;
 /*
-        if (GTK_WIDGET_VISIBLE(child->widget))	{
+        if (gtk_widget_get_visible(child->widget))	{
             GtkRequisition child_requisition;
 
             // Do not remove child request !!! Label's proper layout depends
@@ -182,7 +182,7 @@ gtk_bar_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
         child = children->data;
         children = children->next;
 
-        if (GTK_WIDGET_VISIBLE( (GtkWidget*)(child) ))
+        if (gtk_widget_get_visible( (GtkWidget*)(child) ))
             nvis_children += 1;
     }
     gtk_widget_queue_draw(widget);
@@ -218,7 +218,7 @@ gtk_bar_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
         child = children->data;
         children = children->next;
 
-        if (GTK_WIDGET_VISIBLE( (GtkWidget*)(child) )) {
+        if (gtk_widget_get_visible( (GtkWidget*)(child) )) {
             DBG("allocate x=%d y=%d\n", child_allocation.x,
                 child_allocation.y);
             gtk_widget_size_allocate((GtkWidget*)(child), &child_allocation);

@@ -126,12 +126,12 @@ gconf_edit_enum(gconf_block *b, xconf *xc, xconf_enum *e)
 
     xconf_get_enum(xc, &i, e);
     xconf_set_enum(xc, i, e);
-    w = gtk_combo_box_new_text();
+    w = gtk_combo_box_text_new();//gtk_combo_box_new_text();
     g_object_set_data(G_OBJECT(w), "enum", e);
     while (e && e->str)
     {
-        gtk_combo_box_insert_text(GTK_COMBO_BOX(w), e->num,
-            e->desc ? _(e->desc) : _(e->str));
+        //gtk_combo_box_insert_text(GTK_COMBO_BOX(w), e->num, e->desc ? _(e->desc) : _(e->str));
+        gtk_combo_box_text_insert(GTK_COMBO_BOX(w), e->num, NULL, e->desc ? _(e->desc) : _(e->str));
         e++;
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(w), i);
