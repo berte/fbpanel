@@ -88,10 +88,10 @@ panel_set_wm_strut(panel *p)
           data[5 + i*2]);
 
     /* if wm supports STRUT_PARTIAL it will ignore STRUT */
-    XChangeProperty(GDK_DISPLAY(), p->topxwin, a_NET_WM_STRUT_PARTIAL,
+    XChangeProperty(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), p->topxwin, a_NET_WM_STRUT_PARTIAL,
         XA_CARDINAL, 32, PropModeReplace,  (unsigned char *) data, 12);
     /* old spec, for wms that do not support STRUT_PARTIAL */
-    XChangeProperty(GDK_DISPLAY(), p->topxwin, a_NET_WM_STRUT,
+    XChangeProperty(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), p->topxwin, a_NET_WM_STRUT,
         XA_CARDINAL, 32, PropModeReplace,  (unsigned char *) data, 4);
 
     RET();
@@ -211,8 +211,10 @@ panel_size_alloc (GtkWidget *widget, GdkRectangle *a, gpointer data)
 static void
 make_round_corners(panel *p)
 {
-    GdkBitmap *b;
-    GdkGC* gc;
+    //GdkBitmap *b;
+    //GdkGC* gc;
+    static cairo_surface_t *surface;
+    cairo_t* gc;
     GdkColor black = { 0, 0, 0, 0};
     GdkColor white = { 1, 0xffff, 0xffff, 0xffff};
     int w, h, r, br;
@@ -229,24 +231,32 @@ make_round_corners(panel *p)
         DBG("radius too small\n");
         RET();
     }
-    b = gdk_pixmap_new(NULL, w, h, 1);
-    gc = gdk_gc_new(GDK_DRAWABLE(b));
+    //b = gdk_pixmap_new(NULL, w, h, 1);
+    surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, w, h);
+    gc = cairo_create(surface); //gdk_gc_new(GDK_DRAWABLE(b));
+    cairo_set_source_surface(gc, NULL, 0, 0); 	
+    cairo_paint(gc);
+    
     gdk_gc_set_foreground(gc, &black);
-    gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, 0, 0, w, h);
+    //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, 0, 0, w, h);
     gdk_gc_set_foreground(gc, &white);
-    gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, r, 0, w-2*r, h);
-    gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, 0, r, r, h-2*r);
-    gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, w-r, r, r, h-2*r);
+    //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, r, 0, w-2*r, h);
+    //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, 0, r, r, h-2*r);
+    //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, w-r, r, r, h-2*r);
 
-    br = 2 * r;
-    gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, 0, 0, br, br, 0*64, 360*64);
-    gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, 0, h-br-1, br, br, 0*64, 360*64);
-    gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, w-br, 0, br, br, 0*64, 360*64);
-    gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, w-br, h-br-1, br, br, 0*64, 360*64);
+    //br = 2 * r;
+    //gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, 0, 0, br, br, 0*64, 360*64);
+    //gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, 0, h-br-1, br, br, 0*64, 360*64);
+    //gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, w-br, 0, br, br, 0*64, 360*64);
+    //gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, w-br, h-br-1, br, br, 0*64, 360*64);
 
-    gtk_widget_shape_combine_mask(p->topgwin, b, 0, 0);
-    g_object_unref(gc);
-    g_object_unref(b);
+    //gtk_widget_shape_combine_mask(p->topgwin, b, 0, 0);
+    //g_object_unref(gc);
+    //g_object_unref(b);
+    cairo_destroy(gc); 	
+    //CSource = surface; 	
+    //gtk_widget_queue_draw(da); 		// tell mainloop we're ready to be called again... 	
+    //gdk_window_get_device_position(event->window, event->device, &x, &y, NULL); 
 
     RET();
 }
@@ -586,11 +596,11 @@ panel_start_gui(panel *p)
     gtk_window_stick(GTK_WINDOW(p->topgwin));
 
     gtk_widget_realize(p->topgwin);
-    p->topxwin = GDK_WINDOW_XWINDOW(p->topgwin->window);
+    p->topxwin = GDK_WINDOW_XWINDOW(gtk_widget_get_window(p->topgwin));
     DBG("topxwin = %lx\n", p->topxwin);
     /* ensure configure event */
-    XMoveWindow(GDK_DISPLAY(), p->topxwin, 20, 20);
-    XSync(GDK_DISPLAY(), False);
+    XMoveWindow(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), p->topxwin, 20, 20);
+    XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), False);
 
     gtk_widget_set_app_paintable(p->topgwin, TRUE);
     calculate_position(p);
@@ -632,7 +642,7 @@ panel_start_gui(panel *p)
     if (p->setstrut)
         panel_set_wm_strut(p);
 
-    XSelectInput(GDK_DISPLAY(), GDK_ROOT_WINDOW(), PropertyChangeMask);
+    XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), GDK_ROOT_WINDOW(), PropertyChangeMask);
     gdk_window_add_filter(gdk_get_default_root_window(),
           (GdkFilterFunc)panel_event_filter, p);
     //XSync(GDK_DISPLAY(), False);
@@ -802,7 +812,7 @@ panel_stop(panel *p)
     g_list_free(p->plugins);
     p->plugins = NULL;
 
-    XSelectInput(GDK_DISPLAY(), GDK_ROOT_WINDOW(), NoEventMask);
+    XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), GDK_ROOT_WINDOW(), NoEventMask);
     gdk_window_remove_filter(gdk_get_default_root_window(),
           (GdkFilterFunc)panel_event_filter, p);
     gtk_widget_destroy(p->topgwin);
@@ -810,8 +820,8 @@ panel_stop(panel *p)
     g_object_unref(fbev);
     //g_free(p->workarea);
     gdk_flush();
-    XFlush(GDK_DISPLAY());
-    XSync(GDK_DISPLAY(), True);
+    XFlush(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()));
+    XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), True);
     RET();
 }
 
@@ -840,7 +850,7 @@ handle_error(Display * d, XErrorEvent * ev)
     char buf[256];
 
     ENTER;
-    XGetErrorText(GDK_DISPLAY(), ev->error_code, buf, 256);
+    XGetErrorText(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), ev->error_code, buf, 256);
     DBG("fbpanel : X error: %s\n", buf);
 
     RET();
