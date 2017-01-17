@@ -29,7 +29,7 @@ FbEv *fbev;
 gint force_quit = 0;
 int config;
 
-//#define DEBUGPRN
+#define DEBUGPRN
 #include "dbg.h"
 
 /** verbosity level of dbg and log functions */

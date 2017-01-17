@@ -181,7 +181,8 @@ extern int verbose;
 extern gint force_quit;
 extern FbEv *fbev;
 extern GtkIconTheme *icon_theme;
-#define FBPANEL_WIN(win)  gdk_window_lookup(win)
+//#define FBPANEL_WIN(win)  gdk_window_lookup(win)
+#define FBPANEL_WIN(win)  gdk_x11_window_lookup_for_display(NULL,win)
 void panel_set_wm_strut(panel *p);
 
 gchar *panel_get_profile(void);

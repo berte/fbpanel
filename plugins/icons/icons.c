@@ -122,7 +122,7 @@ get_wmclass(task *tk)
         XFree(tk->ch.res_name);
     if (tk->ch.res_class)
         XFree(tk->ch.res_class);
-    if (!XGetClassHint (gdk_display, tk->win, &tk->ch)) 
+    if (!XGetClassHint (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win, &tk->ch)) 
         tk->ch.res_class = tk->ch.res_name = NULL;
     DBG("name=%s class=%s\n", tk->ch.res_name, tk->ch.res_class);
     RET();
@@ -153,7 +153,7 @@ static int task_has_icon(task *tk)
         RET(1);
     }
     
-    hints = XGetWMHints(GDK_DISPLAY(), tk->win);
+    hints = XGetWMHints(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win);
     if (hints)
     {
         if ((hints->flags & IconPixmapHint) || (hints->flags & IconMaskHint))
@@ -263,7 +263,7 @@ set_icon_maybe (icons_priv *ics, task *tk)
         RET();
 
     DBG("%s size=%d\n", pix->ch.res_name, pix->size);
-    XChangeProperty (GDK_DISPLAY(), tk->win,
+    XChangeProperty (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win,
           a_NET_WM_ICON, XA_CARDINAL, 32, PropModeReplace, (guchar*) pix->data, pix->size);
 
     RET();
@@ -334,7 +334,7 @@ do_net_client_list(icons_priv *ics)
             
             if (!FBPANEL_WIN(tk->win))
             {
-                XSelectInput(GDK_DISPLAY(), tk->win,
+                XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win,
                     PropertyChangeMask | StructureNotifyMask);
             }
             get_wmclass(tk);

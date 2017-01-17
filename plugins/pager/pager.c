@@ -59,8 +59,10 @@ typedef struct _pager_priv  pager_priv;
 struct _desk {
     GtkWidget *da;
     Pixmap xpix;
-    GdkPixmap *gpix;
-    GdkPixmap *pix;
+    //GdkPixmap *gpix;
+    //GdkPixmap *pix;
+    cairo_surface_t *gpix;
+    cairo_surface_t *pix;
     guint no, dirty, first;
     gfloat scalew, scaleh;
     pager_priv *pg;
@@ -166,14 +168,14 @@ task_get_sizepos(task *t)
     XWindowAttributes win_attributes;
 
     ENTER;
-    if (!XGetWindowAttributes(GDK_DISPLAY(), t->win, &win_attributes)) {
-        if (!XGetGeometry (GDK_DISPLAY(), t->win, &root, &t->x, &t->y, &t->w, &t->h,
+    if (!XGetWindowAttributes(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) , t->win, &win_attributes)) {
+        if (!XGetGeometry (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) , t->win, &root, &t->x, &t->y, &t->w, &t->h,
                   &dummy, &dummy)) {
             t->x = t->y = t->w = t->h = 2;
         }
 
     } else {
-        XTranslateCoordinates (GDK_DISPLAY(), t->win, win_attributes.root,
+        XTranslateCoordinates (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) , t->win, win_attributes.root,
               -win_attributes.border_width,
               -win_attributes.border_width,
               &rx, &ry, &junkwin);
@@ -212,14 +214,14 @@ task_update_pix(task *t, desk *d)
     widget = GTK_WIDGET(d->da);
     gdk_draw_rectangle (d->pix,
           (d->pg->focusedtask == t) ?
-          widget->style->bg_gc[GTK_STATE_SELECTED] :
-          widget->style->bg_gc[GTK_STATE_NORMAL],
+          gtk_widget_get_style(widget)/*->bg_gc[GTK_STATE_SELECTED]*/ :
+          gtk_widget_get_style(widget)/*->bg_gc[GTK_STATE_NORMAL]*/,
           TRUE,
           x+1, y+1, w-1, h-1);
     gdk_draw_rectangle (d->pix,
           (d->pg->focusedtask == t) ?
-          widget->style->fg_gc[GTK_STATE_SELECTED] :
-          widget->style->fg_gc[GTK_STATE_NORMAL],
+          gtk_widget_get_style(widget)/*->fg_gc[GTK_STATE_SELECTED]*/ :
+          gtk_widget_get_style(widget)/*->fg_gc[GTK_STATE_NORMAL]*/,
           FALSE,
           x, y, w, h);
     RET();
@@ -235,34 +237,38 @@ desk_clear_pixmap(desk *d)
     GtkWidget *widget;
 
     ENTER;
+    
+    GtkAllocation *allocation = g_new0 (GtkAllocation, 1);
+    gtk_widget_get_allocation(GTK_WIDGET(widget), allocation); 
+
     DBG("d->no=%d\n", d->no);
     if (!d->pix)
         RET();
     widget = GTK_WIDGET(d->da);
     if (d->pg->wallpaper && d->xpix != None) {
         gdk_draw_drawable (d->pix,
-              widget->style->dark_gc[GTK_STATE_NORMAL],
+              gtk_widget_get_style(widget)/*->dark_gc[GTK_STATE_NORMAL]*/,
               d->gpix,
               0, 0, 0, 0,
-              widget->allocation.width,
-              widget->allocation.height);
+              allocation->width,
+              allocation->height);
     } else {
         gdk_draw_rectangle (d->pix,
               ((d->no == d->pg->curdesk) ?
-                    widget->style->dark_gc[GTK_STATE_SELECTED] :
-                    widget->style->dark_gc[GTK_STATE_NORMAL]),
+                    gtk_widget_get_style(widget)/*->dark_gc[GTK_STATE_SELECTED]*/ :
+                    gtk_widget_get_style(widget)/*->dark_gc[GTK_STATE_NORMAL]*/),
               TRUE,
               0, 0,
-              widget->allocation.width,
-              widget->allocation.height);
+              allocation->width,
+              allocation->height);
     }
     if (d->pg->wallpaper && d->no == d->pg->curdesk)
         gdk_draw_rectangle (d->pix,
-              widget->style->light_gc[GTK_STATE_SELECTED],
+              gtk_widget_get_style(widget)/*->light_gc[GTK_STATE_SELECTED]*/,
               FALSE,
               0, 0,
-              widget->allocation.width -1,
-              widget->allocation.height -1);
+              allocation->width -1,
+              allocation->height -1);
     RET();
 }
 
@@ -271,23 +277,30 @@ static void
 desk_draw_bg(pager_priv *pg, desk *d1)
 {
     Pixmap xpix;
-    GdkPixmap *gpix;
+    cairo_surface_t *gpix;
     GdkPixbuf *p1, *p2;
     gint width, height, depth;
     FbBg *bg = pg->fbbg;
     GtkWidget *widget = d1->da;
+    GtkAllocation *da_allocation = NULL;
+
+    GtkAllocation *allocation = g_new0 (GtkAllocation, 1);
+    gtk_widget_get_allocation(GTK_WIDGET(widget), allocation); 
+
 
     ENTER;
     if (d1->no) {
         desk *d0 = d1->pg->desks[0];
+    	gtk_widget_get_allocation(d0->da, da_allocation);
         if (d0->gpix && d0->xpix != None
-              && d0->da->allocation.width == widget->allocation.width
-              && d0->da->allocation.height == widget->allocation.height) {
+              && da_allocation->width == allocation->width
+              && da_allocation->height == allocation->height) {
             gdk_draw_drawable(d1->gpix,
-                  widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+                  //widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+                  gtk_widget_get_style(widget),
                   d0->gpix,0, 0, 0, 0,
-                  widget->allocation.width,
-                  widget->allocation.height);
+                  allocation->width,
+                  allocation->height);
             d1->xpix = d0->xpix;
             DBG("copy gpix from d0 to d%d\n", d1->no);
             RET();
@@ -295,8 +308,8 @@ desk_draw_bg(pager_priv *pg, desk *d1)
     }
     xpix = fb_bg_get_xrootpmap(bg);
     d1->xpix = None;
-    width = widget->allocation.width;
-    height = widget->allocation.height;
+    width = allocation->width;
+    height = allocation->height;
     DBG("w %d h %d\n", width, height);
     if (width < 3 || height < 3)
         RET();
@@ -305,7 +318,7 @@ desk_draw_bg(pager_priv *pg, desk *d1)
     xpix = fb_bg_get_xrootpmap(bg);
     if (xpix == None)
         RET();
-    depth = gdk_drawable_get_depth(widget->window);
+    depth = gdk_drawable_get_depth(gtk_widget_get_window(widget));
     gpix = fb_bg_get_xroot_pix_for_area(bg, 0, 0, gdk_screen_width(), gdk_screen_height(), depth);
     if (!gpix) {
         ERR("fb_bg_get_xroot_pix_for_area failed\n");
@@ -327,8 +340,9 @@ desk_draw_bg(pager_priv *pg, desk *d1)
         ERR("gdk_pixbuf_scale_simple failed\n");
         goto err_p1;
     }
-    gdk_draw_pixbuf(d1->gpix, widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-          p2, 0, 0, 0, 0, width, height,  GDK_RGB_DITHER_NONE, 0, 0);
+    //gdk_draw_pixbuf(d1->gpix, widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+    cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(gtk_widget_get_window(widget)));
+    gdk_cairo_set_source_pixbuf(cr, p2, width, height);
 
     d1->xpix = xpix;
     g_object_unref(p2);
@@ -393,8 +407,9 @@ desk_expose_event (GtkWidget *widget, GdkEventExpose *event, desk *d)
             task_update_pix(t, d);
         }
     }
-    gdk_draw_drawable(widget->window,
-          widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+    gdk_draw_drawable(gtk_widget_get_window(widget),
+          //widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+          gtk_widget_get_style(widget),
           d->pix,
           event->area.x, event->area.y,
           event->area.x, event->area.y,
@@ -408,19 +423,22 @@ static gint
 desk_configure_event (GtkWidget *widget, GdkEventConfigure *event, desk *d)
 {
     int w, h;
+    
+    GtkAllocation *allocation = g_new0 (GtkAllocation, 1);
+    gtk_widget_get_allocation(GTK_WIDGET(widget), allocation);
 
     ENTER;
-    w = widget->allocation.width;
-    h = widget->allocation.height;
+    w = allocation->width;
+    h = allocation->height;
 
     DBG("d->no=%d %dx%d %dx%d\n", d->no, w, h, d->pg->daw, d->pg->dah);
     if (d->pix)
         g_object_unref(d->pix);
     if (d->gpix)
         g_object_unref(d->gpix);
-    d->pix = gdk_pixmap_new(widget->window, w, h, -1);
+    d->pix = gdk_pixmap_new(gtk_widget_get_window(widget), w, h, -1);
     if (d->pg->wallpaper) {
-        d->gpix = gdk_pixmap_new(widget->window, w, h, -1);
+        d->gpix = gdk_pixmap_new(gtk_widget_get_window(widget), w, h, -1);
         desk_draw_bg(d->pg, d);
     }
     d->scalew = (gfloat)h / (gfloat)gdk_screen_height();
@@ -567,7 +585,7 @@ do_net_client_list_stacking(FbEv *ev, pager_priv *p)
             t->refcount++;
             t->win = p->wins[i];
             if (!FBPANEL_WIN(t->win))
-                XSelectInput (GDK_DISPLAY(), t->win, PropertyChangeMask | StructureNotifyMask);
+                XSelectInput (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) , t->win, PropertyChangeMask | StructureNotifyMask);
             t->desktop = get_net_wm_desktop(t->win);
             get_net_wm_state(t->win, &t->nws);
             get_net_wm_window_type(t->win, &t->nwwt);

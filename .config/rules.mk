@@ -157,10 +157,10 @@ endif
 ifeq ($(origin CFLAGS),undefined)
 ifeq ($(origin DEBUG),undefined)
 #CFLAGS = -O2 -Wall -Werror
-CFLAGS = -O2 -Wall -Werror
+CFLAGS = -g3 -O2 -Wall -Werror
 else
 #CFLAGS = -O0 -Wall -Werror
-CFLAGS = -O0 -Wall -Werror
+CFLAGS = -g3 -O0 -Wall -Werror
 endif
 endif
 ifneq ($(origin DEBUG),undefined)

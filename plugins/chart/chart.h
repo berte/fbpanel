@@ -9,7 +9,7 @@
 /* chart.h */
 typedef struct {
     plugin_instance plugin;
-    GdkGC **gc_cpu;
+    cairo_t **gc_cpu;
     GtkWidget *da;
 
     gint **ticks;

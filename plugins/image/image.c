@@ -12,8 +12,8 @@
 
 typedef struct {
     plugin_instance plugin;
-    GdkPixmap *pix;
-    GdkBitmap *mask;
+    cairo_surface_t *pix;
+    void *mask;
     GtkWidget *mainw;
 } image_priv;
 

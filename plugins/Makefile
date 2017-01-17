@@ -2,8 +2,8 @@
 
 TOPDIR := ..
 
-#SUBDIRS := battery \
-    chart \
+SUBDIRS := battery \
+    #chart \
     cpu \
     dclock \
     deskno \
@@ -11,7 +11,6 @@ TOPDIR := ..
     genmon \
     icons \
     image \
-    launchbar \
     mem \
     mem2 \
     menu \
@@ -20,7 +19,8 @@ TOPDIR := ..
     pager \
     separator \
     space \
-    systray \
+   # systray \
+    launchbar \
     taskbar \
     tclock \
     volume \

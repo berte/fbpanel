@@ -165,7 +165,8 @@ mem_constructor(plugin_instance *p)
 {
     mem_priv *mem;
     gint w, h;
-    GtkProgressBarOrientation o;
+    //GtkProgressBarOrientation o;
+    GtkOrientable *o;
 
     ENTER;
     mem = (mem_priv *) p;
@@ -175,26 +176,30 @@ mem_constructor(plugin_instance *p)
 
     if (p->panel->orientation == GTK_ORIENTATION_HORIZONTAL)
     {
-        o = GTK_PROGRESS_BOTTOM_TO_TOP;
+        //o = GTK_PROGRESS_BOTTOM_TO_TOP;
+	gtk_orientable_set_orientation (o, GTK_ORIENTATION_VERTICAL);
         w = 9;
         h = 0;
     }
     else
     {
-        o = GTK_PROGRESS_LEFT_TO_RIGHT;
+        //o = GTK_PROGRESS_LEFT_TO_RIGHT;
+	gtk_orientable_set_orientation (o, GTK_ORIENTATION_HORIZONTAL);
         w = 0;
         h = 9;
     }  
     mem->mem_pb = gtk_progress_bar_new();
     gtk_box_pack_start(GTK_BOX(mem->box), mem->mem_pb, FALSE, FALSE, 0);
-    gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(mem->mem_pb), o);
+    //gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(mem->mem_pb), o);
+    gtk_orientable_set_orientation(o, GTK_ORIENTATION_VERTICAL);
     gtk_widget_set_size_request(mem->mem_pb, w, h);
 
     if (mem->show_swap)
     {
         mem->swap_pb = gtk_progress_bar_new();
         gtk_box_pack_start(GTK_BOX(mem->box), mem->swap_pb, FALSE, FALSE, 0);
-        gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(mem->swap_pb), o);
+        //gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(mem->swap_pb), o);
+        gtk_orientable_set_orientation(o, GTK_ORIENTATION_HORIZONTAL);
         gtk_widget_set_size_request(mem->swap_pb, w, h);
     }
 

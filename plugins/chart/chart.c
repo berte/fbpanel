@@ -84,7 +84,7 @@ chart_draw(chart_priv *c)
 	
             val = c->ticks[j][(i + c->pos) % c->w];
             if (val)
-                gdk_draw_line(c->da->window, c->gc_cpu[j], i, y, i, y - val);
+                gdk_draw_line(gtk_widget_get_window(c->da), c->gc_cpu[j], i, y, i, y - val);
             y -= val;
         }
     }
@@ -130,12 +130,18 @@ static gint
 chart_expose_event(GtkWidget *widget, GdkEventExpose *event, chart_priv *c)
 {
     ENTER;
-    gdk_window_clear(widget->window);
+    gdk_window_clear(gtk_widget_get_window(widget));
     chart_draw(c);
 
-    gtk_paint_shadow(widget->style, widget->window,
-        widget->state, GTK_SHADOW_ETCHED_IN,
-        &c->area, widget, "frame", c->fx, c->fy, c->fw, c->fh);
+    cairo_t *cr = gdk_drawing_context_get_cairo_context ( gdk_window_begin_draw_frame (gtk_widget_get_window(widget), NULL));
+
+    gtk_render_frame(gtk_widget_get_style (widget),
+    		     cr,
+		     c->fx, 
+		     c->fy, 
+		     c->fw, 
+		     c->fh);
+
 
 #if 0
     gdk_draw_rectangle(widget->window, 
@@ -186,15 +192,20 @@ chart_alloc_gcs(chart_priv *c, gchar *colors[])
     int i;  
     GdkColor color;
 
+    cairo_surface_t * surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, 0, 0); 
+    cairo_t * gc = cairo_create(surface); //gdk_gc_new(GDK_DRAWABLE(b));
+    cairo_set_source_surface(gc, NULL, 0, 0);   
+
+
     ENTER;
     c->gc_cpu = g_new0( typeof(*c->gc_cpu), c->rows);
     if (c->gc_cpu) {
         for (i = 0; i < c->rows; i++) {
-            c->gc_cpu[i] = gdk_gc_new(c->plugin.panel->topgwin->window);
+            //c->gc_cpu[i] = gdk_gc_new(gtk_widget_get_window(c->plugin.panel->topgwin));
+            c->gc_cpu[i] = gc; //gdk_gc_new(gtk_widget_get_window(c->plugin.panel->topgwin));
             gdk_rgba_parse(colors[i], &color);
-            gdk_colormap_alloc_color(
-                gdk_drawable_get_colormap(c->plugin.panel->topgwin->window),
-                &color, FALSE, TRUE);
+            //gdk_colormap_alloc_color( gdk_drawable_get_colormap(gtk_widget_get_window(c->plugin.panel->topgwin)), &color, FALSE, TRUE);
+	    gdk_window_set_background (NULL, &color);
             gdk_gc_set_foreground(c->gc_cpu[i],  &color);
         }
     }

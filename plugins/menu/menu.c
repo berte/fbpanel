@@ -232,6 +232,9 @@ my_button_pressed(GtkWidget *widget, GdkEventButton *event, plugin_instance *p)
     menu_priv *m = (menu_priv *) p;
 
     ENTER;
+    GtkAllocation *allocation = g_new0 (GtkAllocation, 1);
+    gtk_widget_get_allocation(GTK_WIDGET(widget), allocation); 
+
     /* propagate Control-Button3 to the panel */
     if (event->type == GDK_BUTTON_PRESS && event->button == 3
         && event->state & GDK_CONTROL_MASK)
@@ -240,8 +243,8 @@ my_button_pressed(GtkWidget *widget, GdkEventButton *event, plugin_instance *p)
     }
 
     if ((event->type == GDK_BUTTON_PRESS)
-        && (event->x >=0 && event->x < widget->allocation.width)
-        && (event->y >=0 && event->y < widget->allocation.height))
+        && (event->x >=0 && event->x < allocation->width)
+        && (event->y >=0 && event->y < allocation->height))
     {
         if (!m->menu)
             menu_create(p);

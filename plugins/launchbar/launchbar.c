@@ -68,6 +68,10 @@ static gboolean
 my_button_pressed(GtkWidget *widget, GdkEventButton *event, btn *b )
 {
     ENTER;
+
+    GtkAllocation *allocation = g_new0 (GtkAllocation, 1);
+    gtk_widget_get_allocation(GTK_WIDGET(widget), allocation); 
+
     if (event->type == GDK_BUTTON_PRESS && event->button == 3
         && event->state & GDK_CONTROL_MASK)
     {
@@ -82,8 +86,8 @@ my_button_pressed(GtkWidget *widget, GdkEventButton *event, btn *b )
     g_assert(b != NULL);
     if (event->type == GDK_BUTTON_RELEASE)
     {
-        if ((event->x >=0 && event->x < widget->allocation.width)
-            && (event->y >=0 && event->y < widget->allocation.height))
+        if ((event->x >=0 && event->x < allocation->width)
+            && (event->y >=0 && event->y < allocation->height))
         {
             run_app(b->action);
         }
@@ -119,14 +123,14 @@ drag_data_received_cb (GtkWidget *widget,
     gchar *s, *str, *tmp, *tok, *tok2;
 
     ENTER;
-    if (sd->length <= 0)
+    if (gtk_selection_data_get_length(sd) <= 0)
         RET();
     DBG("uri drag received: info=%d/%s len=%d data=%s\n",
          info, target_table[info].target, sd->length, sd->data);
     if (info == TARGET_URILIST)
     {
         /* white-space separated list of uri's */
-        s = g_strdup((gchar *)sd->data);
+        s = g_strdup((gchar *)gtk_selection_data_get_data(sd));
         str = g_strdup(b->action);
         for (tok = strtok(s, "\n \t\r"); tok; tok = strtok(NULL, "\n \t\r"))
         {
@@ -147,7 +151,7 @@ drag_data_received_cb (GtkWidget *widget,
     {
         gchar *utf8, *tmp;
         
-	utf8 = g_utf16_to_utf8((gunichar2 *) sd->data, (glong) sd->length,
+	utf8 = g_utf16_to_utf8((gunichar2 *) gtk_selection_data_get_data(sd), (glong) gtk_selection_data_get_length(sd),
               NULL, NULL, NULL);
         tmp = utf8 ? strchr(utf8, '\n') : NULL;
 	if (!tmp)
@@ -198,7 +202,8 @@ read_button(plugin_instance *p, xconf *xc)
     g_signal_connect (G_OBJECT (button), "button-press-event",
           G_CALLBACK (my_button_pressed), (gpointer) &lb->btns[lb->btn_num]);
 
-    GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
+    //GTK_WIDGET_UNSET_FLAGS (button, gtk_widget_set_can_focus(button, TRUE));
+    gtk_widget_set_can_focus(button, TRUE);
     // DnD support
     gtk_drag_dest_set (GTK_WIDGET(button),
         GTK_DEST_DEFAULT_ALL, //GTK_DEST_DEFAULT_HIGHLIGHT,

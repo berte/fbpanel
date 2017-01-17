@@ -103,6 +103,7 @@ gtk_bgbox_get_type (void)
 static void
 gtk_bgbox_class_init (GtkBgboxClass *class)
 {
+    GtkRequisition nat;
     GObjectClass *object_class = G_OBJECT_CLASS (class);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (class);
 
@@ -110,7 +111,7 @@ gtk_bgbox_class_init (GtkBgboxClass *class)
 
     widget_class->realize         = gtk_bgbox_realize;
 //    widget_class->size_request    = gtk_bgbox_size_request;
-    gtk_widget_get_preferred_size(widget_class, gtk_bgbox_size_request,gtk_bgbox_size_request);
+    gtk_widget_get_preferred_size((GtkWidget*)widget_class, NULL, &nat);
     widget_class->size_allocate   = gtk_bgbox_size_allocate;
     widget_class->style_set       = gtk_bgbox_style_set;
     widget_class->configure_event = gtk_bgbox_configure_event;

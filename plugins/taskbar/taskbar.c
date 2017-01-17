@@ -248,11 +248,12 @@ del_task (taskbar_priv * tb, task *tk, int hdel)
 
 
 
-static GdkColormap*
-get_cmap (GdkPixmap *pixmap)
+static GdkVisual*
+get_cmap (cairo_surface_t *pixmap)
 {
-  GdkColormap *cmap;
-
+  GdkScreen *screen = gtk_widget_get_screen (pixmap);
+  GdkVisual *cmap = gdk_screen_get_rgba_visual (screen);
+  
   ENTER;
   cmap = gdk_drawable_get_colormap (pixmap);
   if (cmap)
@@ -268,7 +269,7 @@ get_cmap (GdkPixmap *pixmap)
       else
         {
           /* Try system cmap */
-          GdkScreen *screen = gdk_drawable_get_screen (GDK_DRAWABLE (pixmap));
+          *screen = gdk_drawable_get_screen (GDK_DRAWABLE (pixmap));
           cmap = gdk_screen_get_system_colormap (screen);
           g_object_ref (G_OBJECT (cmap));
         }

@@ -53,7 +53,9 @@ mk_effects_block(xconf *xc)
 
     /* label */
     w = gtk_label_new(NULL);
-    gtk_misc_set_alignment(GTK_MISC(w), 0, 0.5);
+    //gtk_misc_set_alignment(GTK_MISC(w), 0, 0.5);
+    gtk_label_set_xalign(GTK_LABEL(w), 0);
+    gtk_label_set_yalign(GTK_LABEL(w), 0.5);
     gtk_label_set_markup(GTK_LABEL(w), _("<b>Visual Effects</b>"));
     gconf_block_add(gl_block, w, TRUE);
 
@@ -134,7 +136,9 @@ mk_prop_block(xconf *xc)
 
     /* label */
     w = gtk_label_new(NULL);
-    gtk_misc_set_alignment(GTK_MISC(w), 0, 0.5);
+    //gtk_misc_set_alignment(GTK_MISC(w), 0, 0.5);
+    gtk_label_set_xalign(GTK_LABEL(w), 0);
+    gtk_label_set_yalign(GTK_LABEL(w), 0.5);
     gtk_label_set_markup(GTK_LABEL(w), _("<b>Properties</b>"));
     gconf_block_add(gl_block, w, TRUE);
 
@@ -180,6 +184,13 @@ geom_changed(gconf_block *b)
 {
     int i, j;
 
+    GdkRectangle  geometry;
+    GdkDisplay   *display = gtk_widget_get_display (b->main);
+    GdkWindow    *window  = gtk_widget_get_window  (b->main);
+    GdkMonitor   *monitor = gdk_display_get_monitor_at_window (display, window);
+    gdk_monitor_get_geometry (monitor, &geometry);
+
+
     ENTER;
     i = gtk_combo_box_get_active(GTK_COMBO_BOX(allign_opt));
     gtk_widget_set_sensitive(xmargin_spin, (i != ALLIGN_CENTER));
@@ -190,8 +201,7 @@ geom_changed(gconf_block *b)
     else if (i == WIDTH_PIXEL) {
         XCG(b->data, "edge", &j, enum, edge_enum);
         gtk_spin_button_set_range(GTK_SPIN_BUTTON(width_spin), 0,
-            (j == EDGE_RIGHT || j == EDGE_LEFT)
-            ? gdk_screen_height() : gdk_screen_width());
+            (j == EDGE_RIGHT || j == EDGE_LEFT  ? geometry.height : geometry.width));
     }
     RET();
 }
@@ -205,7 +215,9 @@ mk_geom_block(xconf *xc)
 
     /* label */
     w = gtk_label_new(NULL);
-    gtk_misc_set_alignment(GTK_MISC(w), 0, 0.5);
+    //gtk_misc_set_alignment(GTK_MISC(w), 0, 0.5);
+    gtk_label_set_xalign(GTK_LABEL(w), 0);
+    gtk_label_set_yalign(GTK_LABEL(w), 0.5);
     gtk_label_set_markup(GTK_LABEL(w), _("<b>Geometry</b>"));
     gconf_block_add(gl_block, w, TRUE);
 
@@ -390,17 +402,29 @@ mk_dialog(xconf *oxc)
 
     sw = mk_tab_global(xconf_get(xc, "global"));
     label = gtk_label_new(_("Panel"));
-    gtk_misc_set_padding(GTK_MISC(label), 4, 1);
+    //gtk_misc_set_padding(GTK_MISC(label), 4, 1);
+    gtk_widget_set_margin_start(label, 4);
+    gtk_widget_set_margin_end(label, 4);
+    gtk_widget_set_margin_top(label, 1);
+    gtk_widget_set_margin_bottom(label, 1);
     gtk_notebook_append_page(GTK_NOTEBOOK(nb), sw, label);
 
     sw = mk_tab_plugins(xc);
     label = gtk_label_new(_("Plugins"));
-    gtk_misc_set_padding(GTK_MISC(label), 4, 1);
+   // gtk_misc_set_padding(GTK_MISC(label), 4, 1);
+    gtk_widget_set_margin_start(label, 4);
+    gtk_widget_set_margin_end(label, 4);
+    gtk_widget_set_margin_top(label, 1);
+    gtk_widget_set_margin_bottom(label, 1);
     gtk_notebook_append_page(GTK_NOTEBOOK(nb), sw, label);
 
     sw = mk_tab_profile(xc);
     label = gtk_label_new(_("Profile"));
-    gtk_misc_set_padding(GTK_MISC(label), 4, 1);
+//  gtk_misc_set_padding(GTK_MISC(label), 4, 1);
+    gtk_widget_set_margin_start(label, 4);
+    gtk_widget_set_margin_end(label, 4);
+    gtk_widget_set_margin_top(label, 1);
+    gtk_widget_set_margin_bottom(label, 1);
     gtk_notebook_append_page(GTK_NOTEBOOK(nb), sw, label);
 
     gtk_widget_show_all(dialog);

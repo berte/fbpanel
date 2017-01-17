@@ -46,7 +46,7 @@ def init():
     opt_group_new('app', 'Application options', default = True)
     opt_new("project_name", group = 'app',
         help = "Project name", metavar='NAME',
-        default = 'fbpanel')
+        default = 'fbpanel3')
     opt_new("project_version", group = 'app',
         help = "Project version", metavar='VER',
         default = lambda : detect_project_version())

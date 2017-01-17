@@ -82,7 +82,7 @@ mk_buttons()
 
     bm = gtk_box_new(FALSE, 3);
 
-    w = gtk_button_new_from_stock(GTK_STOCK_ADD);
+    w = gtk_button_new_with_label("_Add");
     gtk_box_pack_start(GTK_BOX(bm), w, FALSE, TRUE, 0);
 
     b = gtk_box_new(FALSE, 3);
@@ -90,13 +90,13 @@ mk_buttons()
     bbox = b;
     gtk_widget_set_sensitive(bbox, FALSE);
 
-    w = gtk_button_new_from_stock(GTK_STOCK_EDIT);
+    w = gtk_button_new_with_label("_Edit");
     gtk_box_pack_start(GTK_BOX(b), w, FALSE, TRUE, 0);
-    w = gtk_button_new_from_stock(GTK_STOCK_DELETE);
+    w = gtk_button_new_with_label("_Delete");
     gtk_box_pack_start(GTK_BOX(b), w, FALSE, TRUE, 0);
-    w = gtk_button_new_from_stock(GTK_STOCK_GO_DOWN);
+    w = gtk_button_new_with_label("go-down");
     gtk_box_pack_start(GTK_BOX(b), w, FALSE, TRUE, 0);
-    w = gtk_button_new_from_stock(GTK_STOCK_GO_UP);
+    w = gtk_button_new_with_label("go-up");
     gtk_box_pack_start(GTK_BOX(b), w, FALSE, TRUE, 0);
 
     return bm;
