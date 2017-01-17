@@ -475,7 +475,7 @@ void
 about()
 {
     gchar *authors[] = { "Anatoly Asviyan <aanatoly@users.sf.net>", NULL };
-    gchar *developers[] = { "Behzat Erte <behzaterte@yandex.com>", NULL };
+    //gchar *developers[] = { "Behzat Erte <behzaterte@yandex.com>", NULL };
 
     ENTER;
     gtk_show_about_dialog(NULL,
@@ -500,10 +500,10 @@ panel_make_menu(panel *p)
     menu = gtk_menu_new();
 
     /* panel's preferences */
-    mi = gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES, NULL);
+    //mi = gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES, NULL);
+    mi = gtk_menu_item_new_with_mnemonic("gtk-preferences");
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), mi);
-    g_signal_connect_swapped(G_OBJECT(mi), "activate",
-        (GCallback)configure, p->xc);
+    g_signal_connect_swapped(G_OBJECT(mi), "activate", (GCallback)configure, p->xc);
     gtk_widget_show (mi);
 
     /* separator */
@@ -512,7 +512,8 @@ panel_make_menu(panel *p)
     gtk_widget_show (mi);
 
     /* about */
-    mi = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT, NULL);
+    //mi = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT, NULL);
+    mi = gtk_menu_item_new_with_mnemonic("gtk-about");
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), mi);
     g_signal_connect(G_OBJECT(mi), "activate",
         (GCallback)about, p);
@@ -714,10 +715,12 @@ panel_parse_global(xconf *xc)
         ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL;
     if (p->orientation == GTK_ORIENTATION_HORIZONTAL) {
         p->my_box_new = gtk_box_new;
-        p->my_separator_new = gtk_vseparator_new;
+        //p->my_separator_new = gtk_vseparator_new;
+        p->my_separator_new = gtk_separator_new;
     } else {
         p->my_box_new = gtk_box_new;
-        p->my_separator_new = gtk_hseparator_new;
+        //p->my_separator_new = gtk_hseparator_new;
+        p->my_separator_new = gtk_separator_new;
     }
     if (p->width < 0)
         p->width = 100;

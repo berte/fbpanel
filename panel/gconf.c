@@ -61,10 +61,10 @@ gconf_block_add(gconf_block *b, GtkWidget *w, gboolean new_row)
         gtk_box_pack_end(GTK_BOX(hbox), s, TRUE, TRUE, 0);
 
         /* allign first elem */
-        if (GTK_IS_MISC(w))
+        if (GTK_IS_WIDGET(w))
         {
             DBG("misc \n");
-            gtk_misc_set_alignment(GTK_MISC(w), 0, 0.5);
+            gtk_label_set_xalign(GTK_LABEL(w), 0.0);
             gtk_size_group_add_widget(b->sgr, w);
         }
     }
@@ -131,12 +131,12 @@ gconf_edit_enum(gconf_block *b, xconf *xc, xconf_enum *e)
     while (e && e->str)
     {
         //gtk_combo_box_insert_text(GTK_COMBO_BOX(w), e->num, e->desc ? _(e->desc) : _(e->str));
-        gtk_combo_box_text_insert(GTK_COMBO_BOX(w), e->num, NULL, e->desc ? _(e->desc) : _(e->str));
+        gtk_combo_box_text_insert((GtkComboBoxText*)(w), e->num, NULL, e->desc ? _(e->desc) : _(e->str));
         e++;
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(w), i);
-    g_signal_connect(G_OBJECT(w), "changed",
-        G_CALLBACK(gconf_edit_enum_cb), xc);
+    g_signal_connect(G_OBJECT(w), "changed", G_CALLBACK(gconf_edit_enum_cb), xc);
+
     if (b && b->cb)
     {
         g_signal_connect_swapped(G_OBJECT(w), "changed",
@@ -191,13 +191,14 @@ gconf_edit_color_cb(GtkColorButton *w, xconf *xc)
     GdkColor c;
     xconf *xc_alpha;
 
-    gtk_color_chooser_get_rgba(GTK_COLOR_BUTTON(w), &c);
-    xconf_set_value(xc, gdk_color_to_RRGGBB(&c));
+    gtk_color_chooser_get_rgba(GtkColorChooser::use-alpa, &c);
+    //xconf_set_value(xc, gdk_color_to_RRGGBB(&c));
     if ((xc_alpha = g_object_get_data(G_OBJECT(w), "alpha")))
     {
-        guint16 a = gtk_color_button_get_alpha(GTK_COLOR_BUTTON(w));
-        a >>= 8;
-        xconf_set_int(xc_alpha, (int) a);
+        //guint16 a = gtk_color_button_get_alpha(GTK_COLOR_BUTTON(w));
+        gtk_color_chooser_set_rgba(GtkColorChooser::use-alpha , &c);
+        //a >>= 8;
+        //xconf_set_int(xc_alpha, (int) a);
     }
 }
 
