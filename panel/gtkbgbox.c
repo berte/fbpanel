@@ -41,7 +41,7 @@
 
 typedef struct {
     //GdkPixmap *pixmap;
-    cairo_surface_t *pixmap;
+    cairo_surface_t *surface;
     guint32 tintcolor;
     gint alpha;
     int bg_type;
@@ -56,7 +56,7 @@ typedef struct {
 static void gtk_bgbox_class_init    (GtkBgboxClass *klass);
 static void gtk_bgbox_init          (GtkBgbox *bgbox);
 static void gtk_bgbox_realize       (GtkWidget *widget);
-static void gtk_bgbox_size_request  (GtkWidget *widget, GtkRequisition   *requisition);
+//static void gtk_bgbox_size_request  (GtkWidget *widget, GtkRequisition   *requisition);
 static void gtk_bgbox_size_allocate (GtkWidget *widget, GtkAllocation    *allocation);
 static void gtk_bgbox_style_set (GtkWidget *widget, GtkStyle  *previous_style);
 static gboolean gtk_bgbox_configure_event(GtkWidget *widget, GdkEventConfigure *e);
@@ -129,7 +129,7 @@ gtk_bgbox_init (GtkBgbox *bgbox)
 
     ENTER;
     //GTK_WIDGET_UNSET_FLAGS (bgbox, GTK_NO_WINDOW);
-    gtk_widget_set_receives_default (bgbox, FALSE);
+    gtk_widget_set_receives_default ((GtkWidget*)bgbox, FALSE);
 
     priv = GTK_BGBOX_GET_PRIVATE (bgbox);
     priv->bg_type = BG_NONE;
@@ -151,9 +151,9 @@ gtk_bgbox_finalize (GObject *object)
 
     ENTER;
     priv = GTK_BGBOX_GET_PRIVATE(GTK_WIDGET(object));
-    if (priv->pixmap) {
-        g_object_unref(priv->pixmap);
-        priv->pixmap = NULL;
+    if (priv->surface) {
+        g_object_unref(priv->surface);
+        priv->surface = NULL;
     }
     if (priv->sid) {
         g_signal_handler_disconnect(priv->bg, priv->sid);
@@ -201,7 +201,7 @@ gtk_bgbox_realize (GtkWidget *widget)
     gtk_widget_set_realized(widget, TRUE);
 
     //border_width = GTK_CONTAINER (widget)->border_width;
-    border_width = gtk_container_get_border_width(widget);
+    border_width = gtk_container_get_border_width((GtkContainer *)widget);
     	
 
     attributes.x = alloc->x + border_width;
@@ -227,13 +227,16 @@ gtk_bgbox_realize (GtkWidget *widget)
 
     attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL ;//| GDK_WA_COLORMAP;
 
-    gtk_widget_set_parent_window (widget, 
-				gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask) );
+    gtk_widget_set_parent_window (widget, gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask) );
 
     gdk_window_set_user_data (gtk_widget_get_window(widget), widget);
 
-    gtk_widget_set_style(widget, gtk_style_attach(gtk_widget_get_style(widget), gtk_widget_get_window(widget)));
+    //gtk_widget_set_style(widget, gtk_style_attach(gtk_widget_get_style(widget), gtk_widget_get_window(widget)));
+    //
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    gtk_style_context_add_provider(context, NULL, GTK_STYLE_PROVIDER_PRIORITY_USER);
 
+    
     if (priv->bg_type == BG_NONE)
         gtk_bgbox_set_background(widget, BG_STYLE, 0, 0);
 
@@ -265,7 +268,7 @@ gtk_bgbox_configure_event (GtkWidget *widget, GdkEventConfigure *e)
     RET(FALSE);
 
 }
-
+/*
 static void
 gtk_bgbox_size_request (GtkWidget *widget, GtkRequisition *requisition)
 {
@@ -285,7 +288,7 @@ gtk_bgbox_size_request (GtkWidget *widget, GtkRequisition *requisition)
     }
     RET();
 }
-
+*/
 /* calls with same allocation are usually refer to exactly same background
  * and we just skip them for optimization reason.
  * so if you see artifacts or unupdated background - reallocate bg on every call
@@ -346,20 +349,27 @@ gtk_bgbox_set_background(GtkWidget *widget, int bg_type, guint32 tintcolor, gint
 {
     GtkBgboxPrivate *priv;
 
+    GtkAllocation *alloc = g_new0 (GtkAllocation, 1);
+    gtk_widget_get_allocation(GTK_WIDGET(widget), alloc); 
+
     ENTER;
     if (!(GTK_IS_BGBOX (widget)))
         RET();
 
     priv = GTK_BGBOX_GET_PRIVATE (widget);
+    cairo_t *cr = cairo_create (priv->surface);
+    
     DBG("widget=%p bg_type old:%d new:%d\n", widget, priv->bg_type, bg_type);
-    if (priv->pixmap) {
-        g_object_unref(priv->pixmap);
-        priv->pixmap = NULL;
+    if (priv->surface) {
+        g_object_unref(priv->surface);
+        priv->surface = NULL;
     }
     priv->bg_type = bg_type;
     if (priv->bg_type == BG_STYLE) {
-        gtk_style_set_background(gtk_widget_get_style(widget), gtk_widget_get_window(widget), 
-				 gdk_window_get_state(gtk_widget_get_window(widget)) );
+//        gtk_style_set_background(gtk_widget_get_style(widget), gtk_widget_get_window(widget), gdk_window_get_state(gtk_widget_get_window(widget)) );
+	
+	gtk_render_background(gtk_style_context_new(), cr, 0, 0, alloc->width, alloc->height);
+
         if (priv->sid) {
             g_signal_handler_disconnect(priv->bg, priv->sid);
             priv->sid = 0;
@@ -394,25 +404,27 @@ gtk_bgbox_set_bg_root(GtkWidget *widget, GtkBgboxPrivate *priv)
 {
     priv = GTK_BGBOX_GET_PRIVATE (widget);
 	
+    cairo_t *cr = cairo_create (priv->surface);
     GtkAllocation* alloc = g_new(GtkAllocation, 1);
     gtk_widget_get_allocation(widget, alloc);
 
     ENTER;
-    priv->pixmap = fb_bg_get_xroot_pix_for_win(priv->bg, widget);
-    if (!priv->pixmap /*|| priv->pixmap ==  GDK_NO_BG*/) {
+    priv->surface = fb_bg_get_xroot_pix_for_win(priv->bg, widget);
+    if (!priv->surface /*|| priv->pixmap ==  GDK_NO_BG*/) {
         //priv->bg_type = BG_NONE;
-        priv->pixmap = NULL;
+        priv->surface = NULL;
 //      gtk_style_set_background(widget->style, widget->window, widget->state);
-        gtk_render_background(widget, NULL, 0, 0, alloc->width, alloc->height);
+        gtk_render_background(gtk_style_context_new(), cr, 0, 0, alloc->width, alloc->height);
         gtk_widget_queue_draw_area(widget, 0, 0, alloc->width, alloc->height);
         DBG("no root pixmap was found\n");
         RET();
     }
     if (priv->alpha)
-        fb_bg_composite(priv->pixmap, gtk_widget_get_style(widget), priv->tintcolor, priv->alpha);
+        fb_bg_composite(gtk_widget_get_window(widget), priv->tintcolor, priv->alpha);
 
     //gdk_window_set_back_pixmap(gtk_widget_get_window(widget), priv->pixmap, FALSE);
-    gdk_window_set_background_pattern(gtk_widget_get_window(widget), priv->pixmap);
+    gdk_window_ensure_native(gtk_widget_get_window(widget));
+    
     RET();
 }
 
@@ -422,7 +434,9 @@ gtk_bgbox_set_bg_inherit(GtkWidget *widget, GtkBgboxPrivate *priv)
     priv = GTK_BGBOX_GET_PRIVATE (widget);
 
     ENTER;
+    
     //gdk_window_set_back_pixmap(gtk_widget_get_window(widget), NULL, TRUE);
-    gdk_window_set_background_pattern(gtk_widget_get_window(widget), NULL);
+    gdk_window_ensure_native(gtk_widget_get_window(widget));
+    
     RET();
 }

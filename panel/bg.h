@@ -58,7 +58,7 @@ typedef struct _FbBg      FbBg;
 GType 		  fb_bg_get_type (void);
 FbBg *		  fb_bg_new (void);
 //void 		  fb_bg_composite (GdkDrawable *base, GdkGC *gc, guint32 tintcolor, gint alpha);
-void 		  fb_bg_composite (cairo_surface_t *base, cairo_t *gc, guint32 tintcolor, gint alpha);
+void 		  fb_bg_composite (GdkWindow *base, guint32 tintcolor, gint alpha);
 cairo_surface_t * fb_bg_get_xroot_pix_for_win (FbBg *bg, GtkWidget *widget);
 //GdkPixmap*	  fb_bg_get_xroot_pix_for_win (FbBg *bg, GtkWidget *widget);
 //GdkPixmap*	  fb_bg_get_xroot_pix_for_area (FbBg *bg,gint x, gint y, gint width, gint height, gint depth);

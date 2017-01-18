@@ -215,9 +215,10 @@ make_round_corners(panel *p)
     //GdkGC* gc;
     static cairo_surface_t *surface;
     cairo_t* gc;
-    GdkColor black = { 0, 0, 0, 0};
-    GdkColor white = { 1, 0xffff, 0xffff, 0xffff};
-    int w, h, r, br;
+    //GdkColor black = { 0, 0, 0, 0};
+    //GdkColor white = { 1, 0xffff, 0xffff, 0xffff};
+    //int w, h, r, br;
+    int w, h, r;
 
     ENTER;
     w = p->aw;
@@ -359,10 +360,16 @@ static gboolean
 mouse_watch(panel *p)
 {
     gint x, y;
+    GdkSeat     *seat;
+    GdkDevice   *device;
 
     ENTER;
-    gdk_display_get_pointer(gdk_display_get_default(), NULL, &x, &y, NULL);
 
+    //gdk_display_get_pointer(gdk_display_get_default(), NULL, &x, &y, NULL);
+    seat = gdk_display_get_default_seat(gdk_display_get_default());
+    device = gdk_seat_get_pointer(seat);
+    gdk_device_get_position (device, NULL, &x, &y);
+    
 /*  Reduce sensitivity area
     p->ah_far = ((x < p->cx - GAP) || (x > p->cx + p->cw + GAP)
         || (y < p->cy - GAP) || (y > p->cy + p->ch + GAP));
@@ -529,8 +536,8 @@ panel_button_press_event(GtkWidget *widget, GdkEventButton *event, panel *p)
     if (event->type == GDK_BUTTON_PRESS && event->button == 3
           && event->state & GDK_CONTROL_MASK) {
         DBG("ctrl-btn3\n");
-        gtk_menu_popup (GTK_MENU (p->menu), NULL, NULL, NULL,
-            NULL, event->button, event->time);
+        //gtk_menu_popup (GTK_MENU (p->menu), NULL, NULL, NULL, NULL, event->button, event->time);
+        gtk_menu_popup_at_pointer(GTK_MENU (p->menu), NULL);
         RET(TRUE);
     }
     RET(FALSE);
@@ -582,7 +589,7 @@ panel_start_gui(panel *p)
         (GCallback) panel_scroll_event, p);
 
     gtk_window_set_resizable(GTK_WINDOW(p->topgwin), FALSE);
-    gtk_window_set_wmclass(GTK_WINDOW(p->topgwin), "panel", "fbpanel");
+    //gtk_window_set_wmclass(GTK_WINDOW(p->topgwin), "panel", "fbpanel3");
     gtk_window_set_title(GTK_WINDOW(p->topgwin), "panel");
     gtk_window_set_position(GTK_WINDOW(p->topgwin), GTK_WIN_POS_NONE);
     gtk_window_set_decorated(GTK_WINDOW(p->topgwin), FALSE);
@@ -705,8 +712,8 @@ panel_parse_global(xconf *xc)
     XCG(xc, "maxelemheight", &p->max_elem_height, int);
 
     /* Sanity checks */
-    if (!gdk_rgba_parse(p->tintcolor_name, &p->gtintcolor))
-        gdk_rgba_parse("white", &p->gtintcolor);
+//    if (!gdk_rgba_parse(p->tintcolor_name, &p->gtintcolor)) /*berte: TODO*/
+  //      gdk_rgba_parse("white", &p->gtintcolor);
     p->tintcolor = gcolor2rgb24(&p->gtintcolor);
     DBG("tintcolor=%x\n", p->tintcolor);
     if (p->alpha > 255)

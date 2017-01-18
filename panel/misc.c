@@ -571,6 +571,12 @@ calculate_position(panel *np)
 {
     int sswidth, ssheight, minx, miny;
 
+   GdkRectangle geometry;
+   GdkDisplay *display = gtk_widget_get_display (np->topgwin);
+   GdkWindow *window = gtk_widget_get_window (np->topgwin);
+   GdkMonitor *monitor = gdk_display_get_monitor_at_window (display, window);
+   gdk_monitor_get_geometry (monitor, &geometry);
+
     ENTER;
     if (0)  {
         //if (np->curdesk < np->wa_len/4) {
@@ -580,8 +586,8 @@ calculate_position(panel *np)
         ssheight = np->workarea[np->curdesk*4 + 3];
     } else {
         minx = miny = 0;
-        sswidth  = gdk_screen_width();
-        ssheight = gdk_screen_height();
+        sswidth  = geometry.width;
+        ssheight = geometry.height;
 
     }
 
@@ -660,7 +666,8 @@ get_button_spacing(GtkRequisition *req, GtkContainer *parent, gchar *name)
         gtk_container_add(parent, b);
 
     gtk_widget_show(b);
-    gtk_widget_size_request(b, req);
+    //gtk_widget_size_request(b, req);
+    gtk_widget_get_preferred_size(b, req, req);
 
     gtk_widget_destroy(b);
     RET();
@@ -706,6 +713,8 @@ void
 menu_pos(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, GtkWidget *widget)
 {
     int w, h;
+    GdkSeat 	*seat;
+    GdkDevice 	*device;
 
     GtkAllocation *allocation = g_new0 (GtkAllocation, 1);
     gtk_widget_get_allocation(GTK_WIDGET(widget), allocation); 
@@ -713,7 +722,12 @@ menu_pos(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, GtkWidget *widget)
     ENTER;
     *push_in = TRUE;
     if (!widget) {
-        gdk_display_get_pointer(gdk_display_get_default(), NULL, x, y, NULL);
+        
+	//gdk_display_get_pointer(gdk_display_get_default(), NULL, x, y, NULL);
+	seat = gdk_display_get_default_seat(gdk_display_get_default());
+	device = gdk_seat_get_pointer(seat);
+	gdk_device_get_position (device, NULL, x, y);
+
         DBG("mouse pos: x %d, y %d\n", *x, *y);
         DBG("menu pos: x %d, y %d\n", *x, *y);
         RET();
@@ -737,7 +751,8 @@ menu_pos(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, GtkWidget *widget)
     } else {
 	
 	GtkRequisition requisition;
-	gtk_widget_get_requisition(GTK_WIDGET(widget), &requisition); 
+	//gtk_widget_get_requisition(GTK_WIDGET(widget), &requisition); 
+	gtk_widget_get_preferred_size(widget, &requisition, 0); 
 
 	w = requisition.width;
 	h = requisition.height;
@@ -994,8 +1009,17 @@ fb_button_new(gchar *iname, gchar *fname, int width, int height,
     //GTK_WIDGET_UNSET_FLAGS (b, GTK_CAN_FOCUS);
     gtk_widget_set_can_focus(b, FALSE);
     image = fb_image_new(iname, fname, width, height);
-    gtk_misc_set_alignment(GTK_MISC(image), 0.5, 0.5);
-    gtk_misc_set_padding (GTK_MISC(image), 0, 0);
+    //gtk_misc_set_alignment(GTK_MISC(image), 0.5, 0.5);
+    //
+    gtk_widget_set_halign(image, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(image, GTK_ALIGN_CENTER);
+
+    //gtk_misc_set_padding (GTK_MISC(image), 0, 0);
+    gtk_widget_set_margin_start(image, 0);
+    gtk_widget_set_margin_end(image, 0);
+    gtk_widget_set_margin_top(image, 0);
+    gtk_widget_set_margin_bottom(image, 0);
+
     conf = g_object_get_data(G_OBJECT(image), "conf");
     conf->hicolor = hicolor;
     conf->pix[1] = fb_pixbuf_make_back_image(conf->pix[0], conf->hicolor);

@@ -279,49 +279,21 @@ fb_bg_get_xroot_pix_for_win(FbBg *bg, GtkWidget *widget)
 
 void
 //fb_bg_composite(GdkDrawable *base, GdkGC *gc, guint32 tintcolor, gint alpha)
-fb_bg_composite(cairo_surface_t *base, cairo_t *gc, guint32 tintcolor, gint alpha)
+fb_bg_composite(GdkWindow *base, guint32 tintcolor, gint alpha)
 {
-    GdkPixbuf *ret, *ret2;
-    int w, h;
-    static GdkVisual *cmap = NULL;
-    GtkWidget* widget = NULL;
-    GdkWindow *root;
-
+    cairo_t *cr;
+    GdkDrawingContext *content;
     ENTER;
-    //gdk_drawable_get_size (base, &w, &h);
-    widget = gtk_offscreen_window_new();
-    w = gdk_window_get_width (gtk_widget_get_window (widget));
-    h = gdk_window_get_height(gtk_widget_get_window (widget));
-    if (!cmap) {
-        //cmap = gdk_colormap_get_system ();
-        cmap = gdk_screen_get_system_visual(NULL);
-    }
-    DBG("here\n");
-    ///ret = gdk_pixbuf_get_from_drawable (NULL, base, cmap, 0, 0, 0, 0, w, h);
-    // GtkWindow *win = gdk_x11_window_get_xid(gtk_widget_get_window(widget));
-    root = gdk_get_default_root_window();
-    ret = gdk_pixbuf_get_from_window (root, 0, 0, w, h);
-    if (!ret)
-        RET();
-    DBG("here w=%d h=%d\n", w, h);
-    ret2 = gdk_pixbuf_composite_color_simple(ret, w, h,
-          GDK_INTERP_HYPER, 255-alpha, MIN(w, h), tintcolor, tintcolor);
-    DBG("here\n");
-    if (!ret2) {
-        g_object_unref(ret);
-        RET();
-    }
-    //gdk_pixbuf_render_to_drawable (ret2, base, gc, 0, 0, 0, 0, w, h, GDK_RGB_DITHER_NONE, 0, 0);
-    //gdk_draw_pixbuf (base, gc, ret2, 0, 0, 0, 0, w, h, GDK_RGB_DITHER_NONE, 0, 0);
     
-    //cairo_t *cr = gdk_cairo_create (base);
-    gdk_cairo_set_source_pixbuf (gc, ret2, 0, 0);
-    cairo_rectangle (gc, 0, 0, w, h);
-    cairo_paint (gc);
-    cairo_destroy (gc);
-
-    g_object_unref(ret);
-    g_object_unref(ret2);
+//    cr = gdk_cairo_create(base);
+    content = gdk_window_begin_draw_frame(base, cairo_region_create());
+    cr = gdk_drawing_context_get_cairo_context(content);
+    //gdk_cairo_set_source_color(cr, tintcolor);
+    gdk_cairo_set_source_rgba(cr, NULL); //check GdkRGBA
+    cairo_paint_with_alpha(cr, (double) alpha / 255);
+    cairo_destroy(cr);
+    fb_bg_changed(fb_bg_get_for_display());
+    
     RET();
 }
 

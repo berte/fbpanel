@@ -39,7 +39,7 @@ typedef struct _panel
     GtkWidget *box;               /* box that contains all plugins */
     GtkWidget *menu;              /* context menu */
     GtkRequisition requisition;
-    GtkWidget *(*my_box_new) (gboolean, gint);
+    GtkWidget *(*my_box_new) (GtkOrientation orientation, gint spacing);
     GtkWidget *(*my_separator_new) ();
 
     FbBg *bg;
