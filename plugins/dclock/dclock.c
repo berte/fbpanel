@@ -80,10 +80,9 @@ dclock_create_calendar()
     gtk_window_stick(GTK_WINDOW(win));
           
     calendar = gtk_calendar_new();
-    gtk_calendar_display_options(
-        GTK_CALENDAR(calendar),
-        GTK_CALENDAR_SHOW_WEEK_NUMBERS | GTK_CALENDAR_SHOW_DAY_NAMES
-        | GTK_CALENDAR_SHOW_HEADING);
+    //gtk_calendar_display_options(
+    gtk_calendar_set_display_options(GTK_CALENDAR(calendar),
+        			     GTK_CALENDAR_SHOW_WEEK_NUMBERS | GTK_CALENDAR_SHOW_DAY_NAMES | GTK_CALENDAR_SHOW_HEADING);
     gtk_container_add(GTK_CONTAINER(win), GTK_WIDGET(calendar));
  
     return win;
@@ -308,8 +307,8 @@ dclock_constructor(plugin_instance *p)
     }
     if (color_str)
     {
-        GdkColor color;
-        if (gdk_rgba_parse (color_str, &color)) 
+        GdkRGBA color;
+        if (gdk_rgba_parse (&color, color_str)) 
             dc->color = gcolor2rgb24(&color);
     }
     if (dc->hours_view == DC_24H)
@@ -321,8 +320,16 @@ dclock_constructor(plugin_instance *p)
         dclock_set_color(dc->glyphs, dc->color);
   
     dc->main = gtk_image_new_from_pixbuf(dc->clock);
-    gtk_misc_set_alignment(GTK_MISC(dc->main), 0.5, 0.5);
-    gtk_misc_set_padding(GTK_MISC(dc->main), 1, 1);
+    //gtk_misc_set_alignment(GTK_MISC(dc->main), 0.5, 0.5);
+    gtk_widget_set_halign(dc->main, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(dc->main, GTK_ALIGN_CENTER);
+
+    //gtk_misc_set_padding(GTK_MISC(dc->main), 1, 1);
+    gtk_widget_set_margin_start(dc->main, 1);
+    gtk_widget_set_margin_end(dc->main, 1);
+    gtk_widget_set_margin_top(dc->main, 1);
+    gtk_widget_set_margin_bottom(dc->main, 1);
+
     gtk_container_add(GTK_CONTAINER(p->pwid), dc->main);
     //gtk_widget_show(dc->clockw);
     g_signal_connect (G_OBJECT (p->pwid), "button_press_event",

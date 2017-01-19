@@ -675,7 +675,7 @@ get_button_spacing(GtkRequisition *req, GtkContainer *parent, gchar *name)
 
 
 guint32
-gcolor2rgb24(GdkColor *color)
+gcolor2rgb24(GdkRGBA *color)
 {
     guint32 i;
 
@@ -684,28 +684,26 @@ gcolor2rgb24(GdkColor *color)
     {
         guint16 r, g, b;
 
-        r = color->red * 0xFF / 0xFFFF;
-        g = color->green * 0xFF / 0xFFFF;
-        b = color->blue * 0xFF / 0xFFFF;
-        DBG("%x %x %x ==> %x %x %x\n", color->red, color->green, color->blue,
-            r, g, b);
+        r = (guint32)(color->red) * 0xFF / 0xFFFF;
+        g = (guint32)(color->green) * 0xFF / 0xFFFF;
+        b = (guint32)(color->blue) * 0xFF / 0xFFFF;
+        DBG("%x %x %x ==> %x %x %x\n", (guint32)color->red, (guint32)color->green, (guint32)color->blue, r, g, b);
     }
 #endif
-    i = (color->red * 0xFF / 0xFFFF) & 0xFF;
+    i = (guint32)(color->red * 0xFF / 0xFFFF) & 0xFF;
     i <<= 8;
-    i |= (color->green * 0xFF / 0xFFFF) & 0xFF;
+    i |= (guint32)(color->green * 0xFF / 0xFFFF) & 0xFF;
     i <<= 8;
-    i |= (color->blue * 0xFF / 0xFFFF) & 0xFF;
+    i |= (guint32)(color->blue * 0xFF / 0xFFFF) & 0xFF;
     DBG("i=%x\n", i);
     RET(i);
 }
 
 gchar *
-gdk_color_to_RRGGBB(GdkColor *color)
+gdk_color_to_RRGGBB(GdkRGBA *color)
 {
     static gchar str[10]; // #RRGGBB + \0
-    g_sprintf(str, "#%02x%02x%02x",
-        color->red >> 8, color->green >> 8, color->blue >> 8);
+    g_sprintf(str, "#%02x%02x%02x", (guint32) color->red >> 8, (guint32)color->green >> 8, (guint32)color->blue >> 8);
     return str;
 }
 

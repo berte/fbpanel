@@ -73,6 +73,21 @@ static void
 chart_draw(chart_priv *c)
 {
     int j, i, y;
+    cairo_t *cr;
+    cairo_surface_t *surface;
+    GdkDrawingContext *content;
+   
+
+    content = gdk_window_begin_draw_frame(gtk_widget_get_window(c->da), cairo_region_create());
+    cr = gdk_drawing_context_get_cairo_context(content);
+
+    surface = gdk_window_create_similar_surface (gtk_widget_get_window (c->da),
+    						CAIRO_CONTENT_COLOR,
+						gtk_widget_get_allocated_width (c->da),
+						gtk_widget_get_allocated_height(c->da));
+
+    cairo_set_source_surface (cr, surface, 0, 0);
+    cairo_paint (cr);
 
     ENTER;
     if (!c->ticks)
@@ -84,7 +99,9 @@ chart_draw(chart_priv *c)
 	
             val = c->ticks[j][(i + c->pos) % c->w];
             if (val)
-                gdk_draw_line(gtk_widget_get_window(c->da), c->gc_cpu[j], i, y, i, y - val);
+                //gdk_draw_line(gtk_widget_get_window(c->da), c->gc_cpu[j], i, y, i, y - val);
+		cairo_move_to(cr, i, y);
+		cairo_line_to(cr, i, y - val);
             y -= val;
         }
     }
@@ -130,17 +147,19 @@ static gint
 chart_expose_event(GtkWidget *widget, GdkEventExpose *event, chart_priv *c)
 {
     ENTER;
-    gdk_window_clear(gtk_widget_get_window(widget));
+
+    //gdk_window_clear(gtk_widget_get_window(widget));
+    cairo_t *cr = NULL;
+
     chart_draw(c);
 
-    cairo_t *cr = gdk_drawing_context_get_cairo_context ( gdk_window_begin_draw_frame (gtk_widget_get_window(widget), NULL));
+    cr = gdk_drawing_context_get_cairo_context ( gdk_window_begin_draw_frame (gtk_widget_get_window(widget), NULL));
+    
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    gtk_style_context_add_provider(context, NULL, GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-    gtk_render_frame(gtk_widget_get_style (widget),
-    		     cr,
-		     c->fx, 
-		     c->fy, 
-		     c->fw, 
-		     c->fh);
+
+    gtk_render_frame(context, cr, c->fx, c->fy, c->fw, c->fh);
 
 
 #if 0
@@ -190,11 +209,11 @@ static void
 chart_alloc_gcs(chart_priv *c, gchar *colors[])
 {
     int i;  
-    GdkColor color;
+    GdkRGBA color;
 
     cairo_surface_t * surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, 0, 0); 
-    cairo_t * gc = cairo_create(surface); //gdk_gc_new(GDK_DRAWABLE(b));
-    cairo_set_source_surface(gc, NULL, 0, 0);   
+    cairo_t * cr = cairo_create(surface); //gdk_gc_new(GDK_DRAWABLE(b));
+    cairo_set_source_surface(cr, NULL, 0, 0);   
 
 
     ENTER;
@@ -202,11 +221,13 @@ chart_alloc_gcs(chart_priv *c, gchar *colors[])
     if (c->gc_cpu) {
         for (i = 0; i < c->rows; i++) {
             //c->gc_cpu[i] = gdk_gc_new(gtk_widget_get_window(c->plugin.panel->topgwin));
-            c->gc_cpu[i] = gc; //gdk_gc_new(gtk_widget_get_window(c->plugin.panel->topgwin));
-            gdk_rgba_parse(colors[i], &color);
+            c->gc_cpu[i] = cr; //gdk_gc_new(gtk_widget_get_window(c->plugin.panel->topgwin));
             //gdk_colormap_alloc_color( gdk_drawable_get_colormap(gtk_widget_get_window(c->plugin.panel->topgwin)), &color, FALSE, TRUE);
-	    gdk_window_set_background (NULL, &color);
-            gdk_gc_set_foreground(c->gc_cpu[i],  &color);
+	    //gdk_window_set_background (NULL, &color);
+            //gdk_gc_set_foreground(c->gc_cpu[i],  &color);
+            gdk_rgba_parse(&color, colors[i]);
+	    //gdk_window_set_background_rgba (gtk_widget_get_window(widget), color);
+	    gdk_window_show(gtk_widget_get_window(c->da));
         }
     }
     RET();

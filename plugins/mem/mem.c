@@ -166,7 +166,7 @@ mem_constructor(plugin_instance *p)
     mem_priv *mem;
     gint w, h;
     //GtkProgressBarOrientation o;
-    GtkOrientable *o;
+    GtkOrientable *o = NULL;
 
     ENTER;
     mem = (mem_priv *) p;

@@ -39,8 +39,11 @@ image_constructor(plugin_instance *p)
     gchar *tooltip, *fname;
     image_priv *img;
     GdkPixbuf *gp, *gps;
-    GtkWidget *wid;
+    GtkWidget *wid = NULL;
     GError *err = NULL;
+    GtkContainer *container = NULL;
+    GList *list;
+    gpointer child;
     
     ENTER;
     img = (image_priv *) p;
@@ -50,27 +53,43 @@ image_constructor(plugin_instance *p)
     fname = expand_tilda(fname);
     
     img->mainw = gtk_event_box_new();
+    
     gtk_widget_show(img->mainw);
-    //g_signal_connect(G_OBJECT(img->mainw), "expose_event",
-    //      G_CALLBACK(gtk_widget_queue_draw), NULL);
+    
+    //g_signal_connect(G_OBJECT(img->mainw), "expose_event", G_CALLBACK(gtk_widget_queue_draw), NULL);
+
     gp = gdk_pixbuf_new_from_file(fname, &err);
-    if (!gp) {
+    
+    if (!gp) 
+    {
         g_warning("image: can't read image %s\n", fname);
         wid = gtk_label_new("?");
-    } else {
-        float ratio;
+    } 
+    else 
+    {
+        
+	float ratio;
                   
         ratio = (p->panel->orientation == GTK_ORIENTATION_HORIZONTAL) ?
-            (float) (p->panel->ah - 2) / (float) gdk_pixbuf_get_height(gp)
-            : (float) (p->panel->aw - 2) / (float) gdk_pixbuf_get_width(gp);
-        gps =  gdk_pixbuf_scale_simple (gp,
-              ratio * ((float) gdk_pixbuf_get_width(gp)),
-              ratio * ((float) gdk_pixbuf_get_height(gp)),
-              GDK_INTERP_HYPER);
-        gdk_pixbuf_render_pixmap_and_mask(gps, &img->pix, &img->mask, 127);
-        g_object_unref(gp);
+            	(float) (p->panel->ah - 2) / (float) gdk_pixbuf_get_height(gp)
+            	: (float) (p->panel->aw - 2) / (float) gdk_pixbuf_get_width(gp);
+
+	gps =  gdk_pixbuf_scale_simple (gp,
+              				ratio * ((float) gdk_pixbuf_get_width(gp)),
+              				ratio * ((float) gdk_pixbuf_get_height(gp)),
+              				GDK_INTERP_HYPER);
+       
+        //gdk_pixbuf_render_pixmap_and_mask(gps, &img->pix, &img->mask, 127);
+	gtk_container_add(container, wid);
+	list = gtk_container_get_children(container);
+	child = g_list_nth_data(list, 0);
+	gtk_fixed_put(child, gtk_image_new_from_pixbuf(gps), 0, 0);
+	gtk_widget_show_all(wid);
+        wid = gtk_image_new_from_pixbuf(gps);
+       	
+	g_list_free(list); 
+	g_object_unref(gp);
         g_object_unref(gps);
-        wid = gtk_image_new_from_pixmap(img->pix, img->mask);
 
     }
     gtk_widget_show(wid);

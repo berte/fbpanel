@@ -3,7 +3,7 @@
 TOPDIR := ..
 
 SUBDIRS := battery \
-    #chart \
+    chart \
     cpu \
     dclock \
     deskno \
@@ -16,10 +16,10 @@ SUBDIRS := battery \
     menu \
     meter \
     net \
-    pager \
+    #pager \
     separator \
     space \
-   # systray \
+    systray \
     launchbar \
     taskbar \
     tclock \

@@ -45,7 +45,7 @@ typedef struct _panel
     FbBg *bg;
     int alpha;
     guint32 tintcolor;
-    GdkColor gtintcolor;
+    GdkRGBA gtintcolor;
     gchar *tintcolor_name;
 
     int ax, ay, aw, ah;  /* prefferd allocation of a panel */

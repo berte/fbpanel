@@ -88,7 +88,8 @@ menu_create_item(xconf *xc, GtkWidget *menu, menu_priv *m)
     
     cmd = name = fname = action = iname = NULL;
     XCG(xc, "name", &name, str);
-    mi = gtk_image_menu_item_new_with_label(name ? name : "");
+    //mi = gtk_image_menu_item_new_with_label(name ? name : "");
+    mi = gtk_menu_item_new_with_label(name ? name : "");
     gtk_container_set_border_width(GTK_CONTAINER(mi), 0);
     XCG(xc, "image", &fname, str);
     fname = expand_tilda(fname);
@@ -97,11 +98,10 @@ menu_create_item(xconf *xc, GtkWidget *menu, menu_priv *m)
     {
         GdkPixbuf *pb;
         
-        if ((pb = fb_pixbuf_new(iname, fname, m->icon_size, m->icon_size,
-                    FALSE)))
+        if ((pb = fb_pixbuf_new(iname, fname, m->icon_size, m->icon_size, FALSE)))
         {
-            gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mi),
-                    gtk_image_new_from_pixbuf(pb));
+            //gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mi), gtk_image_new_from_pixbuf(pb));
+	    g_signal_connect (mi, "activate", NULL, menu);
             g_object_unref(G_OBJECT(pb));
         }
     }
@@ -248,11 +248,12 @@ my_button_pressed(GtkWidget *widget, GdkEventButton *event, plugin_instance *p)
     {
         if (!m->menu)
             menu_create(p);
-        if (p->panel->autohide)
+        
+	if (p->panel->autohide)
             ah_stop(p->panel);
-        gtk_menu_popup(GTK_MENU(m->menu),
-            NULL, NULL, (GtkMenuPositionFunc)menu_pos, widget,
-            event->button, event->time);
+
+	//gtk_menu_popup(GTK_MENU(m->menu), NULL, NULL, (GtkMenuPositionFunc)menu_pos, widget, event->button, event->time);
+	gtk_menu_popup_at_pointer(GTK_MENU (m->menu), NULL);
        
     }
     RET(TRUE);
@@ -302,7 +303,8 @@ rebuild_menu(plugin_instance *p)
     menu_priv *m = (menu_priv *) p;
     
     ENTER;
-    if (m->menu && GTK_WIDGET_MAPPED(m->menu))
+    //if (m->menu && GTK_WIDGET_MAPPED(m->menu))
+    if (m->menu && gtk_widget_get_mapped(m->menu))
         RET(TRUE);
     menu_create(p);
     m->rtout = 0;
