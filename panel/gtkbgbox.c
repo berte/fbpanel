@@ -231,7 +231,7 @@ gtk_bgbox_realize (GtkWidget *widget)
 
     gdk_window_set_user_data (gtk_widget_get_window(widget), widget);
 
-    //gtk_widget_set_style(widget, gtk_style_attach(gtk_widget_get_style(widget), gtk_widget_get_window(widget)));
+    //gtk_widget_set_style(widget, gtk_style_attach(gtk_widget_get_style_context(widget), gtk_widget_get_window(widget)));
     //
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     gtk_style_context_add_provider(context, NULL, GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -366,7 +366,7 @@ gtk_bgbox_set_background(GtkWidget *widget, int bg_type, guint32 tintcolor, gint
     }
     priv->bg_type = bg_type;
     if (priv->bg_type == BG_STYLE) {
-//        gtk_style_set_background(gtk_widget_get_style(widget), gtk_widget_get_window(widget), gdk_window_get_state(gtk_widget_get_window(widget)) );
+//        gtk_style_set_background(gtk_widget_get_style_context(widget), gtk_widget_get_window(widget), gdk_window_get_state(gtk_widget_get_window(widget)) );
 	
 	gtk_render_background(gtk_style_context_new(), cr, 0, 0, alloc->width, alloc->height);
 

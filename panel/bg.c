@@ -202,9 +202,9 @@ fb_bg_get_xrootpmap_real(FbBg *bg)
 
 
 //GdkPixmap *
+//fb_bg_get_xroot_pix_for_area(FbBg *bg, gint x, gint y,
 cairo_surface_t *
-fb_bg_get_xroot_pix_for_area(FbBg *bg, gint x, gint y,
-    gint width, gint height, gint depth)
+fb_bg_get_xroot_pix_for_area(FbBg *bg, gint x, gint y, gint width, gint height)
 {
     //GdkPixmap *gbgpix;
     cairo_surface_t *gbgpix;
@@ -213,7 +213,8 @@ fb_bg_get_xroot_pix_for_area(FbBg *bg, gint x, gint y,
     ENTER;
     if (bg->pixmap == None)
         RET(NULL);
-    
+   
+    /* berte: TODO */
     //gdk_pixmap_new(NULL, width, height, depth);
     gbgpix = cairo_image_surface_create (CAIRO_FORMAT_A1, width, height);
     
@@ -228,6 +229,7 @@ fb_bg_get_xroot_pix_for_area(FbBg *bg, gint x, gint y,
 
     XSetTSOrigin(bg->dpy, bg->gc, -x, -y) ;
     XFillRectangle(bg->dpy, bgpix, bg->gc, 0, 0, width, height);
+    
     RET(gbgpix);
 }
 

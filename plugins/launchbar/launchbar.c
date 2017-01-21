@@ -255,7 +255,8 @@ launchbar_constructor(plugin_instance *p)
     launchbar_priv *lb; 
     int i;
     xconf *pxc;
-    GtkWidget *ali;
+    GtkWidget *ali = NULL;
+    GtkCssProvider *provider;
     static gchar *launchbar_rc = "style 'launchbar-style'\n"
         "{\n"
         "GtkWidget::focus-line-width = 0\n"
@@ -271,9 +272,13 @@ launchbar_constructor(plugin_instance *p)
     DBG("iconsize=%d\n", lb->iconsize);
 
     gtk_widget_set_name(p->pwid, "launchbar");
-    gtk_rc_parse_string(launchbar_rc);
+    //gtk_rc_parse_string(launchbar_rc);
     //get_button_spacing(&req, GTK_CONTAINER(p->pwid), "");
-    ali = gtk_alignment_new(0.5, 0.5, 0, 0);
+    provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data (provider, launchbar_rc, -1, NULL);
+    gtk_style_context_add_provider(gtk_widget_get_style_context(ali),GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    g_object_unref (provider);
+    //ali = gtk_alignment_new(0.5, 0.5, 0, 0); /*berte:TODO*/
     g_signal_connect(G_OBJECT(ali), "size-allocate",
         (GCallback) launchbar_size_alloc, lb);
     gtk_container_set_border_width(GTK_CONTAINER(ali), 0);

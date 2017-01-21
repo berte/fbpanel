@@ -533,7 +533,7 @@ get_wm_icon(Window tkwin, int iw, int ih)
     GdkPixbuf *ret, *masked, *pixmap, *mask = NULL;
 
     ENTER;
-    hints = XGetWMHints(GDK_DISPLAY(), tkwin);
+    hints = XGetWMHints(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tkwin);
     DBG("\nwm_hints %s\n", hints ? "ok" : "failed");
     if (!hints)
         RET(NULL);
@@ -549,7 +549,7 @@ get_wm_icon(Window tkwin, int iw, int ih)
     if (xpixmap == None)
         RET(NULL);
 
-    if (!XGetGeometry (GDK_DISPLAY(), xpixmap, &win, &sd, &sd, &w, &h,
+    if (!XGetGeometry (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), xpixmap, &win, &sd, &sd, &w, &h,
               (guint *)&sd, (guint *)&sd)) {
         DBG("XGetGeometry failed for %x pixmap\n", (unsigned int)xpixmap);
         RET(NULL);
@@ -558,7 +558,7 @@ get_wm_icon(Window tkwin, int iw, int ih)
     pixmap = _wnck_gdk_pixbuf_get_from_pixmap (NULL, xpixmap, 0, 0, 0, 0, w, h);
     if (!pixmap)
         RET(NULL);
-    if (xmask != None && XGetGeometry (GDK_DISPLAY(), xmask,
+    if (xmask != None && XGetGeometry (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), xmask,
               &win, &sd, &sd, &w, &h, (guint *)&sd, (guint *)&sd)) {
         mask = _wnck_gdk_pixbuf_get_from_pixmap (NULL, xmask, 0, 0, 0, 0, w, h);
 
@@ -619,7 +619,7 @@ static gboolean
 on_flash_win( task *tk )
 {
     tk->flash_state = !tk->flash_state;
-    gtk_widget_set_state(tk->button,
+    gtk_widget_set_state_flags(tk->button,
           tk->flash_state ? GTK_STATE_SELECTED : tk->tb->normal_state);
     gtk_widget_queue_draw(tk->button);
     return TRUE;
@@ -660,8 +660,8 @@ tk_raise_window( task *tk, guint32 time )
         Xclimsg(tk->win, a_NET_ACTIVE_WINDOW, 2, time, 0, 0, 0);
     }
     else {
-        XRaiseWindow (GDK_DISPLAY(), tk->win);
-        XSetInputFocus (GDK_DISPLAY(), tk->win, RevertToNone, CurrentTime);
+        XRaiseWindow (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win);
+        XSetInputFocus (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win, RevertToNone, CurrentTime);
     }
     DBG("XRaiseWindow %x\n", tk->win);
 }
@@ -670,7 +670,7 @@ static void
 tk_callback_leave( GtkWidget *widget, task *tk)
 {
     ENTER;
-    gtk_widget_set_state(widget,
+    gtk_widget_set_state_flags(widget,
           (tk->focused) ? tk->tb->focused_state : tk->tb->normal_state);
     RET();
 }
@@ -680,7 +680,7 @@ static void
 tk_callback_enter( GtkWidget *widget, task *tk )
 {
     ENTER;
-    gtk_widget_set_state(widget,
+    gtk_widget_set_state_flags(widget,
           (tk->focused) ? tk->tb->focused_state : tk->tb->normal_state);
     RET();
 }
@@ -728,7 +728,7 @@ tk_callback_expose(GtkWidget *widget, GdkEventExpose *event, task *tk)
     ENTER;
     state = (tk->focused) ? tk->tb->focused_state : tk->tb->normal_state;
     if (GTK_WIDGET_STATE(widget) != state) {
-        gtk_widget_set_state(widget, state);
+        gtk_widget_set_state_flags(widget, state);
         gtk_widget_queue_draw(widget);
     } else {
         if( ! tk->flash || 0 == tk->flash_state ) {
@@ -768,12 +768,12 @@ tk_callback_scroll_event (GtkWidget *widget, GdkEventScroll *event, task *tk)
         if (gdkwindow)
             gdk_window_show (gdkwindow);
         else
-            XMapRaised (GDK_DISPLAY(), tk->win);
-        XSetInputFocus (GDK_DISPLAY(), tk->win, RevertToNone, CurrentTime);
+            XMapRaised (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win);
+        XSetInputFocus (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win, RevertToNone, CurrentTime);
         DBG("XMapRaised  %x\n", tk->win);
     } else if (event->direction == GDK_SCROLL_DOWN) {
         DBG("tb->ptk = %x\n", (tk->tb->ptk) ? tk->tb->ptk->win : 0);
-        XIconifyWindow (GDK_DISPLAY(), tk->win, DefaultScreen(GDK_DISPLAY()));
+        XIconifyWindow (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win, DefaultScreen(GDK_DISPLAY_XDISPLAY(gdk_display_get_default())));
         DBG("XIconifyWindow %x\n", tk->win);
     }
 
@@ -821,16 +821,16 @@ tk_callback_button_release_event(GtkWidget *widget, GdkEventButton *event,
                 if (gdkwindow)
                     gdk_window_show (gdkwindow);
                 else
-                    XMapRaised (GDK_DISPLAY(), tk->win);
-                XSync (GDK_DISPLAY(), False);
+                    XMapRaised (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win);
+                XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), False);
                 DBG("XMapRaised  %x\n", tk->win);
             }
         } else {
             DBG("tb->ptk = %x\n", (tk->tb->ptk) ? tk->tb->ptk->win : 0);
             if (tk->focused || tk == tk->tb->ptk) {
                 //tk->iconified = 1;
-                XIconifyWindow (GDK_DISPLAY(), tk->win,
-                    DefaultScreen(GDK_DISPLAY()));
+                XIconifyWindow (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win,
+                    DefaultScreen(GDK_DISPLAY_XDISPLAY(gdk_display_get_default())));
                 DBG("XIconifyWindow %x\n", tk->win);
             } else {
                 tk_raise_window( tk, event->time );
@@ -843,7 +843,7 @@ tk_callback_button_release_event(GtkWidget *widget, GdkEventButton *event,
             0, 0, 0);
     } else if (event->button == 3) {
         /*
-        XLowerWindow (GDK_DISPLAY(), tk->win);
+        XLowerWindow (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win);
         DBG("XLowerWindow %x\n", tk->win);
         */
         tk->tb->menutask = tk;
@@ -863,7 +863,7 @@ tk_update(gpointer key, task *tk, taskbar_priv *tb)
     ENTER;
     g_assert ((tb != NULL) && (tk != NULL));
     if (task_visible(tb, tk)) {
-        gtk_widget_set_state (tk->button,
+        gtk_widget_set_state_flags (tk->button,
               (tk->focused) ? tb->focused_state : tb->normal_state);
         gtk_widget_queue_draw(tk->button);
         //_gtk_button_set_depressed(GTK_BUTTON(tk->button), tk->focused);
@@ -911,7 +911,7 @@ tk_build_gui(taskbar_priv *tb, task *tk)
      * Do not change event mask to gtk windows spwaned by this gtk client
      * this breaks gtk internals */
     if (!FBPANEL_WIN(tk->win))
-        XSelectInput(GDK_DISPLAY(), tk->win,
+        XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win,
                 PropertyChangeMask | StructureNotifyMask);
 
     /* button */
@@ -1138,7 +1138,7 @@ tk_has_urgency( task* tk )
     XWMHints* hints;
 
     tk->urgency = 0;
-    hints = XGetWMHints(GDK_DISPLAY(), tk->win);
+    hints = XGetWMHints(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tk->win);
     if (hints) {
         if (hints->flags & XUrgencyHint) /* Got urgency hint */
             tk->urgency = 1;
@@ -1236,10 +1236,10 @@ menu_close_window(GtkWidget *widget, taskbar_priv *tb)
 {
     ENTER;
     DBG("win %x\n", tb->menutask->win);
-    XSync (GDK_DISPLAY(), 0);
-    //XKillClient(GDK_DISPLAY(), tb->menutask->win);
+    XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), 0);
+    //XKillClient(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tb->menutask->win);
     Xclimsgwm(tb->menutask->win, a_WM_PROTOCOLS, a_WM_DELETE_WINDOW);
-    XSync (GDK_DISPLAY(), 0);
+    XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), 0);
     RET();
 }
 
@@ -1249,7 +1249,7 @@ menu_raise_window(GtkWidget *widget, taskbar_priv *tb)
 {
     ENTER;
     DBG("win %x\n", tb->menutask->win);
-    XMapRaised(GDK_DISPLAY(), tb->menutask->win);
+    XMapRaised(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tb->menutask->win);
     RET();
 }
 
@@ -1259,8 +1259,8 @@ menu_iconify_window(GtkWidget *widget, taskbar_priv *tb)
 {
     ENTER;
     DBG("win %x\n", tb->menutask->win);
-    XIconifyWindow (GDK_DISPLAY(), tb->menutask->win,
-        DefaultScreen(GDK_DISPLAY()));
+    XIconifyWindow (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), tb->menutask->win,
+        DefaultScreen(GDK_DISPLAY_XDISPLAY(gdk_display_get_default())));
     RET();
 }
 
@@ -1302,17 +1302,17 @@ tb_make_menu(GtkWidget *widget, taskbar_priv *tb)
     ENTER;
     menu = gtk_menu_new ();
 
-    mi = gtk_image_menu_item_new_with_label (_("Raise"));
+    mi = gtk_menu_item_new_with_label (_("Raise"));
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mi),
-          gtk_image_new_from_stock(GTK_STOCK_GO_UP, GTK_ICON_SIZE_MENU));
+          gtk_image_new_from_icon_name(GTK_STOCK_GO_UP, GTK_ICON_SIZE_MENU));
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), mi);
     g_signal_connect(G_OBJECT(mi), "activate",
         (GCallback)menu_raise_window, tb);
     gtk_widget_show (mi);
 
-    mi = gtk_image_menu_item_new_with_label (_("Iconify"));
+    mi = gtk_menu_item_new_with_label (_("Iconify"));
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mi),
-          gtk_image_new_from_stock(GTK_STOCK_UNDO, GTK_ICON_SIZE_MENU));
+          gtk_image_new_from_icon_name(GTK_STOCK_UNDO, GTK_ICON_SIZE_MENU));
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), mi);
     g_signal_connect(G_OBJECT(mi), "activate",
         (GCallback)menu_iconify_window, tb);
@@ -1323,24 +1323,24 @@ tb_make_menu(GtkWidget *widget, taskbar_priv *tb)
     for (i = 0; i < tb->desk_num; i++) {
         buf = g_strdup_printf("%d  %s", i + 1,
             (i < tb->desk_namesno) ? tb->desk_names[i] : "");
-        mi = gtk_image_menu_item_new_with_label (buf);
+        mi = gtk_menu_item_new_with_label (buf);
         g_object_set_data(G_OBJECT(mi), "num", GINT_TO_POINTER(i));
         gtk_menu_shell_append (GTK_MENU_SHELL (submenu), mi);
         g_signal_connect(G_OBJECT(mi), "button_press_event",
             (GCallback)send_to_workspace, tb);
         g_free(buf);
     }
-    mi = gtk_image_menu_item_new_with_label(_("All workspaces"));
+    mi = gtk_menu_item_new_with_label(_("All workspaces"));
     g_object_set_data(G_OBJECT(mi), "num", GINT_TO_POINTER(ALL_WORKSPACES));
     g_signal_connect(mi, "activate",
         (GCallback)send_to_workspace, tb);
     gtk_menu_shell_append (GTK_MENU_SHELL (submenu), mi);
     gtk_widget_show_all(submenu);
 
-    mi = gtk_image_menu_item_new_with_label(_("Move to workspace"));
+    mi = gtk_menu_item_new_with_label(_("Move to workspace"));
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(mi), submenu);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(mi),
-          gtk_image_new_from_stock(GTK_STOCK_JUMP_TO, GTK_ICON_SIZE_MENU));
+          gtk_image_new_from_icon_name(GTK_STOCK_JUMP_TO, GTK_ICON_SIZE_MENU));
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), mi);
     gtk_widget_show (mi);
 

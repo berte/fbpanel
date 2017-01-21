@@ -12,8 +12,10 @@
 
 typedef struct {
     plugin_instance plugin;
-    GdkPixmap *pix;
-    GdkBitmap *mask;
+    //GdkPixmap *pix;
+    cairo_surface_t *pix;
+    //GdkBitmap *mask;
+    cairo_t *mask;
     int button1, button2;
     int action1, action2;
 } wincmd_priv;
@@ -113,9 +115,9 @@ toggle_iconify(wincmd_priv *wc)
     }
     while (j-- > 0) {
         if (raise) 
-            XMapWindow (GDK_DISPLAY(), awin[j]);
+            XMapWindow (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), awin[j]);
         else
-            XIconifyWindow(GDK_DISPLAY(), awin[j], DefaultScreen(GDK_DISPLAY()));
+            XIconifyWindow(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), awin[j], DefaultScreen(GDK_DISPLAY_XDISPLAY(gdk_display_get_default())));
     }
     
     g_free(awin);

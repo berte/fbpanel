@@ -53,7 +53,8 @@ tclock_create_calendar(void)
     gtk_window_stick(GTK_WINDOW(win));
 
     calendar = gtk_calendar_new();
-    gtk_calendar_display_options(
+    //gtk_calendar_display_options(
+    gtk_calendar_set_display_options(
         GTK_CALENDAR(calendar),
         GTK_CALENDAR_SHOW_WEEK_NUMBERS | GTK_CALENDAR_SHOW_DAY_NAMES
         | GTK_CALENDAR_SHOW_HEADING);
@@ -155,8 +156,14 @@ tclock_constructor(plugin_instance *p)
 
     clock_update(dc);
 
-    gtk_misc_set_alignment(GTK_MISC(dc->clockw), 0.5, 0.5);
-    gtk_misc_set_padding(GTK_MISC(dc->clockw), 4, 0);
+    //gtk_misc_set_alignment(GTK_MISC(dc->clockw), 0.5, 0.5);
+    gtk_widget_set_halign(dc->clockw, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(dc->clockw, GTK_ALIGN_CENTER);
+    //gtk_misc_set_padding(GTK_MISC(dc->clockw), 4, 0);
+    gtk_widget_set_margin_start(dc->clockw, 4);
+    gtk_widget_set_margin_end(dc->clockw, 4);
+    gtk_widget_set_margin_top(dc->clockw, 0);
+    gtk_widget_set_margin_bottom(dc->clockw, 0);
     gtk_label_set_justify(GTK_LABEL(dc->clockw), GTK_JUSTIFY_CENTER);
     gtk_container_add(GTK_CONTAINER(dc->main), dc->clockw);
     gtk_widget_show_all(dc->main);

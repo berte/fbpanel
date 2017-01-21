@@ -37,14 +37,29 @@ button_press_handler (GtkWidget *tip,
 }
 
 static gboolean
-expose_handler (GtkTooltips *tooltips)
+expose_handler (GtkTooltip *tooltip, cairo_t *cr)
 {
-  gtk_paint_flat_box (tip->style, tip->window,
-                      GTK_STATE_NORMAL, GTK_SHADOW_OUT, 
-                      NULL, tip, "tooltip",
-                      0, 0, -1, -1);
+    //gtk_paint_flat_box (tip->style, tip->window, GTK_STATE_NORMAL, GTK_SHADOW_OUT, NULL, tip, "tooltip", 0, 0, -1, -1);
+    GtkStyleContext *context;
+    GtkStateFlags state;
+    int width, height;
 
-  return FALSE;
+    width = gtk_widget_get_allocated_width (tip);
+    height = gtk_widget_get_allocated_height (tip);
+
+    state = gtk_widget_get_state_flags (tip);
+    context = gtk_widget_get_style_context (tip);
+    gtk_style_context_save (context);
+    gtk_style_context_add_class (context, GTK_STYLE_CLASS_TOOLTIP);
+    gtk_style_context_set_state (context, state);
+
+    cairo_save (cr);
+    gtk_render_background (context, cr, 0.0, 0.0, (gdouble)width, (gdouble)height);
+    cairo_restore (cr);
+
+    gtk_style_context_restore (context);
+    
+    return FALSE;
 }
 
 void
@@ -63,16 +78,16 @@ fixed_tip_show (int screen_number,
       {
         GdkScreen *gdk_screen;
 
-        gdk_screen = gdk_display_get_screen (gdk_get_default_display (),
-                                             screen_number);
-        gtk_window_set_screen (GTK_WINDOW (tip),
-                               gdk_screen);
+        gdk_screen = gdk_display_get_screen (gdk_get_default_display (), screen_number);
+        gtk_window_set_screen (GTK_WINDOW (tip),  gdk_screen);
         screen_width = gdk_screen_get_width (gdk_screen);
         screen_height = gdk_screen_get_height (gdk_screen);
       }
 #else
-      screen_width = gdk_screen_width ();
-      screen_height = gdk_screen_height ();      
+      //screen_width = gdk_screen_width ();
+      //screen_height = gdk_screen_height ();      
+    	screen_width = gtk_widget_get_allocated_width (tip);
+    	screen_height = gtk_widget_get_allocated_height (tip);
 #endif
       
       gtk_widget_set_app_paintable (tip, TRUE);
@@ -95,7 +110,9 @@ fixed_tip_show (int screen_number,
       
       label = gtk_label_new (NULL);
       gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
-      gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+      //gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+      gtk_widget_set_halign(label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
       gtk_widget_show (label);
       
       gtk_container_add (GTK_CONTAINER (tip), label);

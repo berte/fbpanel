@@ -132,7 +132,8 @@ volume_create_slider(volume_priv *c)
     gtk_container_add(GTK_CONTAINER(win), frame);
     gtk_container_set_border_width(GTK_CONTAINER(frame), 1);
     
-    slider = gtk_vscale_new_with_range(0.0, 100.0, 1.0);
+    //slider = gtk_vscale_new_with_range(0.0, 100.0, 1.0);
+    slider = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, 0.0, 100.0, 1.0);
     gtk_widget_set_size_request(slider, 25, 82);
     gtk_scale_set_draw_value(GTK_SCALE(slider), TRUE);
     gtk_scale_set_value_pos(GTK_SCALE(slider), GTK_POS_BOTTOM);

@@ -616,7 +616,7 @@ panel_start_gui(panel *p)
     gtk_window_move(GTK_WINDOW(p->topgwin), p->ax, p->ay);
     gtk_window_resize(GTK_WINDOW(p->topgwin), p->aw, p->ah);
     DBG("move-resize x %d y %d w %d h %d\n", p->ax, p->ay, p->aw, p->ah);
-    //XSync(GDK_DISPLAY(), False);
+    //XSync(GDK_DISPLAY(), False); //berte: not me
     //gdk_flush();
 
     // background box all over toplevel
@@ -654,7 +654,7 @@ panel_start_gui(panel *p)
     XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), GDK_ROOT_WINDOW(), PropertyChangeMask);
     gdk_window_add_filter(gdk_get_default_root_window(),
           (GdkFilterFunc)panel_event_filter, p);
-    //XSync(GDK_DISPLAY(), False);
+    //XSync(GDK_DISPLAY(), False); //berte: not me
     gdk_flush();
     RET();
 }

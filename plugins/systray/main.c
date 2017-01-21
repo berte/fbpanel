@@ -31,9 +31,15 @@ static void
 tray_bg_changed(FbBg *bg, GtkWidget *widget)
 {
     ENTER;
-    gtk_widget_set_size_request(widget, widget->allocation.width,
-        widget->allocation.height);
+  
+    int width, height;
+    width = gtk_widget_get_allocated_width(widget);
+    height = gtk_widget_get_allocated_height(widget);
+
+    //gtk_widget_set_size_request(widget, widget->allocation.width, widget->allocation.height);
+    gtk_widget_set_size_request(widget, width, height);
     gtk_widget_hide(widget);
+
     if (gtk_events_pending())
         gtk_main_iteration();
     gtk_widget_show(widget);
@@ -69,8 +75,10 @@ message_sent (EggTrayManager *manager, GtkWidget *icon, const char *text,
     int x, y;
     
     ENTER;
-    gdk_window_get_origin (icon->window, &x, &y);
-    fixed_tip_show (0, x, y, FALSE, gdk_screen_height () - 50, text);
+    //gdk_window_get_origin (icon->window, &x, &y);
+    gdk_window_get_origin (gtk_widget_get_window(icon), &x, &y);
+    //fixed_tip_show (0, x, y, FALSE, gdk_screen_height () - 50, text);
+    fixed_tip_show (0, x, y, FALSE, gtk_widget_get_allocated_height(icon) - 50, text);
     RET();
 }
 
@@ -127,7 +135,7 @@ tray_constructor(plugin_instance *p)
     ENTER;
     tr = (tray_priv *) p;
     class_get("tray");
-    ali = gtk_alignment_new(0.5, 0.5, 0, 0);
+    ali = NULL; //gtk_alignment_new(0.5, 0.5, 0, 0);
     g_signal_connect(G_OBJECT(ali), "size-allocate",
         (GCallback) tray_size_alloc, tr);
     gtk_container_set_border_width(GTK_CONTAINER(ali), 0);

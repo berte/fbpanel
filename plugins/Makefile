@@ -11,16 +11,16 @@ SUBDIRS := battery \
     genmon \
     icons \
     image \
+    launchbar \
     mem \
     mem2 \
     menu \
     meter \
     net \
-    #pager \
+    pager \
     separator \
     space \
     systray \
-    launchbar \
     taskbar \
     tclock \
     volume \
