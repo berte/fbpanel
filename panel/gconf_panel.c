@@ -54,8 +54,8 @@ mk_effects_block(xconf *xc)
     /* label */
     w = gtk_label_new(NULL);
     //gtk_misc_set_alignment(GTK_MISC(w), 0, 0.5);
-    gtk_label_set_xalign(GTK_LABEL(w), 0);
-    gtk_label_set_yalign(GTK_LABEL(w), 0.5);
+    gtk_widget_set_halign(w, GTK_ALIGN_START);
+    gtk_widget_set_valign(w, GTK_ALIGN_CENTER);
     gtk_label_set_markup(GTK_LABEL(w), _("<b>Visual Effects</b>"));
     gconf_block_add(gl_block, w, TRUE);
 

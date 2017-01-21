@@ -13,7 +13,7 @@
 #include "misc.h"
 #include "plugin.h"
 
-//#define DEBUGPRN
+#define DEBUGPRN
 #include "dbg.h"
 
 

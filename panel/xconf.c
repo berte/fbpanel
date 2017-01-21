@@ -6,7 +6,7 @@
 #include "xconf.h"
 #include "panel.h"
 
-//#define DEBUGPRN
+#define DEBUGPRN
 #include "dbg.h"
 
 

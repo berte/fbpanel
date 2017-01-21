@@ -10,7 +10,7 @@
 # Note 2: values will be evaluated in the same order they were added, so
 # if you want libdir's default value to be '$eprefix/lib', add it after prefix
 
-add_var package "package name, e.g fbpanel or mplayer" fbpanel
+add_var package "package name, e.g fbpanel or mplayer" fbpanel3
 add_var version "package version, e.g 6.2 or 1.4.5-alpha2" 6.2
 
 # Custom
@@ -27,4 +27,4 @@ add_var ldflagsx "linker flags" '$glib_libs $gtk_libs'
 
 add_var gmodule_libs "gmodule libs" '`scripts/rfs-pkg-config --libs gmodule-2.0`'
 
-add_feature static_build "build all pluginis into main binary" disabled
+add_feature static_build "build all pluginis into main binary" enable

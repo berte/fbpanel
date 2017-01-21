@@ -214,11 +214,10 @@ make_round_corners(panel *p)
     //GdkBitmap *b;
     //GdkGC* gc;
     static cairo_surface_t *surface;
-    cairo_t* gc;
+    cairo_t* cr;
     //GdkColor black = { 0, 0, 0, 0};
     //GdkColor white = { 1, 0xffff, 0xffff, 0xffff};
-    //int w, h, r, br;
-    int w, h, r;
+    int w, h, r, br;
 
     ENTER;
     w = p->aw;
@@ -234,27 +233,51 @@ make_round_corners(panel *p)
     }
     //b = gdk_pixmap_new(NULL, w, h, 1);
     surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, w, h);
-    gc = cairo_create(surface); //gdk_gc_new(GDK_DRAWABLE(b));
-    cairo_set_source_surface(gc, NULL, 0, 0); 	
-    cairo_paint(gc);
+    cr = cairo_create(surface); //gdk_gc_new(GDK_DRAWABLE(b));
+    cairo_set_source_surface(cr, NULL, 0, 0); 	
+    cairo_paint(cr);
     
     //gdk_gc_set_foreground(gc, &black);
     //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, 0, 0, w, h);
+    cairo_rectangle(cr, 0, 0, w, h);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_fill(cr);
     //gdk_gc_set_foreground(gc, &white);
     //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, r, 0, w-2*r, h);
+    cairo_rectangle(cr, r, 0, w-2*r, h);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_fill(cr);
     //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, 0, r, r, h-2*r);
+    cairo_rectangle(cr, 0, r, r, h-2*r);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_fill(cr);
     //gdk_draw_rectangle(GDK_DRAWABLE(b), gc, TRUE, w-r, r, r, h-2*r);
+    cairo_rectangle(cr, w-r, r, r, h-2*r);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_fill(cr);
 
-    //br = 2 * r;
+    br = 2 * r;
     //gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, 0, 0, br, br, 0*64, 360*64);
+    cairo_arc (cr, 0, 0, r, 0*64, 360*64);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_fill(cr);
     //gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, 0, h-br-1, br, br, 0*64, 360*64);
+    cairo_arc (cr, 0, h-br-1, r, 0*64, 360*64);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_fill(cr);
     //gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, w-br, 0, br, br, 0*64, 360*64);
+    cairo_arc (cr, w-br, 0, r, 0*64, 360*64);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_fill(cr);
     //gdk_draw_arc(GDK_DRAWABLE(b), gc, TRUE, w-br, h-br-1, br, br, 0*64, 360*64);
+    cairo_arc (cr, w-br, h-br-1, r, 0*64, 360*64);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_fill(cr);
 
     //gtk_widget_shape_combine_mask(p->topgwin, b, 0, 0);
     //g_object_unref(gc);
     //g_object_unref(b);
-    cairo_destroy(gc); 	
+    cairo_destroy(cr); 	
     //CSource = surface; 	
     //gtk_widget_queue_draw(da); 		// tell mainloop we're ready to be called again... 	
     //gdk_window_get_device_position(event->window, event->device, &x, &y, NULL); 
@@ -507,8 +530,8 @@ panel_make_menu(panel *p)
     menu = gtk_menu_new();
 
     /* panel's preferences */
-    //mi = gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES, NULL);
-    mi = gtk_menu_item_new_with_mnemonic("gtk-preferences");
+    mi = gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES, NULL);
+    //mi = gtk_menu_item_new_with_mnemonic("gtk-preferences");
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), mi);
     g_signal_connect_swapped(G_OBJECT(mi), "activate", (GCallback)configure, p->xc);
     gtk_widget_show (mi);
@@ -519,8 +542,8 @@ panel_make_menu(panel *p)
     gtk_widget_show (mi);
 
     /* about */
-    //mi = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT, NULL);
-    mi = gtk_menu_item_new_with_mnemonic("gtk-about");
+    mi = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT, NULL);
+    //mi = gtk_menu_item_new_with_mnemonic("gtk-about");
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), mi);
     g_signal_connect(G_OBJECT(mi), "activate",
         (GCallback)about, p);
